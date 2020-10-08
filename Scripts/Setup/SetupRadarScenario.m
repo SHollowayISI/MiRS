@@ -1,12 +1,10 @@
-%% PANUAS Radar System - Example Radar Initialization File
+%% MiRS - Example Radar Initialization File
 %{
 
     Sean Holloway
-    PANUAS Init File
+    MiRS Init File
     
-    This file specifies radar parameters for PANUAS simulation.
-
-    Use script 'FullSystem_PANUAS.m' to run scenarios.
+    This file specifies radar parameters for MiRS simulation.
     
 %}
 
@@ -75,7 +73,7 @@ scenario.radarsetup.tracking = tracking;
 %% Run Setup Scripts
 
 % Set up Phased Array Toolbox system objects
-scenario = PhasedSetup_PANUAS(scenario);
+scenario = PhasedSetup(scenario);
 
 
 

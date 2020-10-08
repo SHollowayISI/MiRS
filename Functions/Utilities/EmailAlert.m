@@ -21,7 +21,7 @@ if attach
     filesize = s.bytes/10e6;
     
     % Send email
-    if filesize > 25
+    if filesize < 25
         % If file size compatible send attachment
         sendmail(address, ...
             ['Test Complete: ', save_name], ...

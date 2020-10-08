@@ -1,13 +1,11 @@
-%% PANUAS Radar System - End of Simulation Tasks
+%% MiRS - End of Process Tasks
 %{
 
     Sean Holloway
-    PANUAS End-of-Simulation Tasks
+    MiRS End-of-Simulation Tasks
 
-    Container script which saves output files from PANUAS simulation,and
+    Container script which saves output files from MiRS simulation, and
     sends alert email.
-
-    For use in FullSystem_PANUAS without automated simulation.
     
 %}
 
@@ -51,25 +49,3 @@ if scenario.simsetup.send_alert
         save_name, ...
         scenario.simsetup.attach_zip);
 end
-
-
-%% File Management (AUTOMATED TEST ONLY)
-
-%{
-% Move file to "Complete" folder
-movefile(['Automated Testing/To Run/', scenario_filename], ...
-    'Automated Testing/Complete/');
-
-% Display message to command window
-disp(['Simulation scenario complete: ', scenario_filename]);
-%}
-
-
-
-
-
-
-
-
-
-

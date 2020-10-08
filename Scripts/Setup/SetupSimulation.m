@@ -1,18 +1,16 @@
-%% PANUAS Radar System - Example Simulation Initialization File
+%% MiRS - Simulation Setup
 %{
 
     Sean Holloway
-    PANUAS Simulation Init File
+    MiRS Simulation Init File
     
-    This file specifies simulation parameters for PANUAS simulation.
-
-    Use script 'FullSystem_PANUAS.m' to run scenarios.
+    This file specifies simulation parameters for MiRS simulation.
     
 %}
 
 %% Simulation Parameter Setup
 
-save_format.list = {'.png','.fig'};
+save_format.list = {'.png', '.fig'};
 
 % Radar simulation and processing setup
 scenario.simsetup = struct( ...
@@ -28,15 +26,15 @@ scenario.simsetup = struct( ...
     ...
     'sim_rate',     2^0, ...                    % Rate to divide fast x slow time simulation
     'clear_cube',   true, ...
-    'send_alert',   false, ...                  % Send email alert T/F
-    'attach_zip',   false, ...
+    'send_alert',   true, ...                  % Send email alert T/F
+    'attach_zip',   true, ...
     'alert_address', 'sholloway@intellisenseinc.com', ...
     ...                                         % Email address for status updates
-    'filename',     'Initial_PANUAS', ...       % Filename to save data as
+    'filename',     'Test_MiRS', ...            % Filename to save data as
     'save_format',  save_format, ...            % File types to save figures
-    'save_figs',    false, ...                  % Save figures T/F
-    'save_mat',     false, ...                  % Save mat file T/F
-    'reduce_mat',   false);                     % Reduce mat file for saving
+    'save_figs',    true, ...                  % Save figures T/F
+    'save_mat',     true, ...                  % Save mat file T/F
+    'reduce_mat',   true);                     % Reduce mat file for saving
 
 
 

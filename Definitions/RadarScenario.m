@@ -1,6 +1,6 @@
-% ClassDef File for PANUAS Radar Scenario
+% ClassDef File for MiRS Radar Scenario
 
-classdef RadarScenario_PANUAS < handle
+classdef RadarScenario < handle
     properties
         target_list
         simsetup
@@ -17,7 +17,7 @@ classdef RadarScenario_PANUAS < handle
     
     methods
         
-        function RadarScenario = RadarScenario_PANUAS()
+        function RadarScenario = RadarScenario()
             % Initialize structure of target list
             RadarScenario.target_list = struct( ...
                 'pos',      [], ...

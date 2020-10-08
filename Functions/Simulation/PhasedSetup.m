@@ -1,5 +1,5 @@
-function [scenario] = PhasedSetup_PANUAS(scenario_in)
-%PHASEDSETUP_PANUAS Sets up Phased Array Toolbox system objects for PANUAS
+function [scenario] = PhasedSetup(scenario_in)
+%PHASEDSETUP_MIRS Sets up Phased Array Toolbox system objects for MiRS
 %   Takes scenario object as input and outputs scenario.sim struct
 %   containing system objects for Phased Array Toolbox simulation.
 

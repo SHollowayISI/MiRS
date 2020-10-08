@@ -1,13 +1,11 @@
-%% PANUAS Radar System - Main Simulation Loop
+%% MiRS - Main Processing Loop
 %{
 
     Sean Holloway
-    PANUAS Main Simulation Loop
+    MiRS Main Processing Loop
     
     This file specifies performs simulation, signal processing, detection,
-    data processing, and results collection for PANUAS system.
-
-    Use script 'FullSystem_PANUAS.m' to run scenarios.
+    data processing, and results collection for MiRS system.
     
 %}
 

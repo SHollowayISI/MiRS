@@ -1,8 +1,8 @@
-%% PAN-UAS Radar System
+%% MiRS System
 %{
 
     Sean Holloway
-    PAN-UAS (Portable Anti-UAS System)
+    MiRS (Millimeter Wave Ranging and Synchronization System)
     MATLAB Simulation & Processing
 
     This shell file runs successive scripts and gauges progress.
