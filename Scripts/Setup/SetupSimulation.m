@@ -10,7 +10,7 @@
 
 %% Simulation Parameter Setup
 
-save_format.list = {'.png', '.fig'};
+save_format.list = {'.png'};
 
 % Radar simulation and processing setup
 scenario.simsetup = struct( ...
@@ -25,16 +25,16 @@ scenario.simsetup = struct( ...
     'readout',      true, ...                   % Read out target data T/F
     ...
     'sim_rate',     2^0, ...                    % Rate to divide fast x slow time simulation
-    'clear_cube',   true, ...
-    'send_alert',   true, ...                  % Send email alert T/F
-    'attach_zip',   true, ...
+    'clear_cube',   false, ...
+    'send_alert',   false, ...                  % Send email alert T/F
+    'attach_zip',   false, ...
     'alert_address', 'sholloway@intellisenseinc.com', ...
     ...                                         % Email address for status updates
     'filename',     'Test_MiRS', ...            % Filename to save data as
     'save_format',  save_format, ...            % File types to save figures
-    'save_figs',    true, ...                  % Save figures T/F
-    'save_mat',     true, ...                  % Save mat file T/F
-    'reduce_mat',   true);                     % Reduce mat file for saving
+    'save_figs',    false, ...                  % Save figures T/F
+    'save_mat',     false, ...                  % Save mat file T/F
+    'reduce_mat',   false);                     % Reduce mat file for saving
 
 
 

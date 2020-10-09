@@ -48,7 +48,7 @@ SetupRadarScenario
 %% Run Simulation & Signal Processing
 
 % Perform main processes of simulation, signal and data processing
-% Main
+Main
 
 %% Save and Package Resultant Data
 
