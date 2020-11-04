@@ -1,5 +1,5 @@
-function [scenario_out] = RadarSimulation_PANUAS(scenario)
-%RADARSIMULATION_PANUAS Generates simulated radar response for PANUAS
+function [scenario_out] = RadarSimulation(scenario)
+%RADARSIMULATION Generates simulated radar response for MiRS
 %   Takes scenario.sim, .simsetup, .radarsetup, .target_list as inputs and
 %   outputs scenario.rx_sig struct containing the received signal.
 
@@ -18,21 +18,7 @@ flags = scenario.flags;
 c = physconst('LightSpeed');
 
 % Derived variables
-num_tx = radarsetup.n_tx_y * radarsetup.n_tx_z;
-num_rx = radarsetup.n_rx_y * radarsetup.n_rx_z;
-num_ant = num_tx * num_rx;
-
-%% MIMO Coding Setup
-
-% Generate weighting matrices
-switch radarsetup.mimo_type
-    case 'TDM'
-        weight = eye(num_tx);
-    case 'CDM'
-        weight = hadamard(num_tx);
-    otherwise
-        error('ERROR: Specify TDM or CDM for MIMO method');
-end
+num_ant = radarsetup.n_rx * radarsetup.n_tx;
 
 %% Simulation
 
@@ -40,21 +26,14 @@ end
 rx_sig = zeros(radarsetup.n_s - radarsetup.drop_s, radarsetup.n_p, num_ant);
 
 % Generate the pulse
-tx_sig = sim.waveform();
+base_sig = sim.waveform();
 
 % Transmit the pulse
-tx_sig = sim.transmitter(tx_sig);
-
-% Update target to start-of-frame location
-% if flags.frame > 1
-%     t_cpi = radarsetup.t_ch*radarsetup.n_p*radarsetup.n_tx_y*radarsetup.n_tx_z;
-%     [target_list.pos, target_list.vel] = sim.target_plat(t_cpi*(flags.frame-1));
-% end
-
+tx_sig = sim.transmitter(base_sig);
 
 for block = 1:radarsetup.n_p
     
-    for chirp = 1:num_tx
+    for chirp = 1:radarsetup.n_tx
         
         % Update target position and velocities
         [target_list.pos, target_list.vel] = sim.target_plat(radarsetup.t_ch);
@@ -63,7 +42,7 @@ for block = 1:radarsetup.n_p
         [~, tgt_ang] = rangeangle(target_list.pos, simsetup.radar_pos);
         
         % Radiate signal towards all targets
-        sig = sim.radiator(tx_sig, tgt_ang, weight(:,chirp));
+        sig = sim.radiator(tx_sig, tgt_ang);
         
         % Propogate signal to the target through two-way channel
         sig = sim.channel(sig, ...
@@ -71,7 +50,7 @@ for block = 1:radarsetup.n_p
             simsetup.radar_vel, target_list.vel);
         
         % Reflect the pulse off of the target
-        sig = sim.target(sig, true);
+        sig = sim.target(sig);
         
         % Collect the reflected target at the antenna array
         sig = sim.collector(sig, tgt_ang);
@@ -80,13 +59,16 @@ for block = 1:radarsetup.n_p
         sig = sim.receiver(sig);
         
         % Dechirp signal
-        sig = dechirp(sig,tx_sig);
+        sig = dechirp(sig, base_sig);
         
         % Apply phase coding to result signal
-        mimo_sig = reshape(sig.*permute(weight(:,chirp), [2 3 1]), length(sig), 1, []);
+        sig = reshape(sig, length(sig), 1, []);
+        
+        % Calculate indices for virtual antenna
+        ch_ind = (1:radarsetup.n_rx) + radarsetup.n_rx * (chirp - 1);
         
         % Save Rx signal by fast time x slow time x virtual antenna
-        rx_sig(:,block,:) = rx_sig(:,block,:) + mimo_sig((radarsetup.drop_s+1):end,:,:);
+        rx_sig(:,block,ch_ind) = sig((radarsetup.drop_s+1):end,:,:);
         
     end
     

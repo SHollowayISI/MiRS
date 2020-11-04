@@ -1,5 +1,5 @@
-function [multi] = Tracking_PANUAS(scenario)
-%TRACKING_PANUAS Multi-Target Tracking system for PAN-UAS project
+function [multi] = Tracking(scenario)
+%TRACKING Multi-Target Tracking system for MiRS project
 %   Takes scenario object as input, returns modified multi object as child of
 %   scenario.
 

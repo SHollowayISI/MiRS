@@ -14,7 +14,7 @@
 %% Target Setup
 
 % Target positions in meters
-tgt_pos = [ 500; ...
+tgt_pos = [ 150; ...
             0; ...
             0];
 
@@ -26,7 +26,7 @@ tgt_vel = [ 0; ...
 %% Set Target RCS
 
 % Target RCS in dBm^2
-tgt_rcs_dbmm = 13;
+tgt_rcs_dbmm = 23;
 
 % Convert to absolute
 tgt_rcs = db2pow(tgt_rcs_dbmm);

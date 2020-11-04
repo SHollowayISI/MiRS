@@ -25,20 +25,22 @@ for loop = 1:scenario.simsetup.num_frames
         %% Radar Simulation
         
         % Run simulation to retrieve fast time x slow time x rx-channel signal
-        scenario = RadarSimulation_PANUAS(scenario);
+        scenario = RadarSimulation(scenario);
         
         %% Signal Processing
         
         % Perform signal processing on received signal
-        scenario.cube = SignalProcessing_PANUAS(scenario);
+        scenario.cube = SignalProcessing(scenario);
         
         % Generate 3-D Cartesian Mesh Grids
-        generateCoordinates(scenario);
+        %TODO: CHANGE THIS TO 3-COORDINATE SYSTEM
+%         generateCoordinates(scenario);
         
         %% Single CPI Data Processing
         
         % Perform single-frame radar detection
-        scenario.detection = DetectionSingle_PANUAS(scenario);
+        %TODO: NEW DETECTION METHOD
+%         scenario.detection = DetectionSingle(scenario);
         
         %% Loop Update Procedures
         
@@ -52,8 +54,10 @@ for loop = 1:scenario.simsetup.num_frames
     
     %% Multiple CPI Data Processing
     
+    %TODO: UPDATE ALL
+    %{
     % Perform binary integration and coordinate determination
-    scenario.detection = DetectionMultiple_PANUAS(scenario);
+    scenario.detection = DetectionMultiple(scenario);
     
     % Read out detection data
     if scenario.simsetup.readout
@@ -64,7 +68,8 @@ for loop = 1:scenario.simsetup.num_frames
     saveMulti(scenario);
     
     % Update multi-target tracking system
-    scenario.multi = Tracking_PANUAS(scenario);
+    scenario.multi = Tracking(scenario);
+    %}
     
     %% Single Slice Visualization
     

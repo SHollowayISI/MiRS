@@ -8,12 +8,25 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
+    - SetupRadarScenario:
+        + Update fields and values for new processing chain:
+            * n_p:                      Number of chirps per CPI
+            * drop_s:                   Number of samples to drop
+            * r_win, d_win, az_win:     Window types
     - Main:
         + Update all files from PAN-UAS version
-    - SetupRadarScenario:
-        + Update fields and values for new processing chain
-    - PhasedSetup:
-        + Update fields and values for new simulation setup
+        + GenerateCoordinates:
+            * Remove or modify this
+        + DetectionSingle:
+            * CFAR/Threshold/other?
+            * Run CFAR for every azimuth swath?
+        + DetectionMultiple:
+            * New detection method for MiRS
+            * Remove elevation dimension
+        + Visualization methods:
+            * Remove elevation swaths
+    - RadarScenario:
+        + Go through each method and remove/modify
 
     NEXT STEPS:
     - Modify to multi-static version

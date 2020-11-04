@@ -1,5 +1,5 @@
-function [detection] = DetectionSingle_PANUAS(scenario)
-%DETECTIONSINGLE_PANUAS Performs target detection for PANUAS project
+function [detection] = DetectionSingle(scenario)
+%DETECTIONSINGLE Performs target detection for MiRS project
 %   Takes scenario object as input, provides scenario.detection object as
 %   output, containing information about detected targets.
 
@@ -13,7 +13,8 @@ flags = scenario.flags;
 %% Perform Detection
 
 % Sum across angle slices
-rd_cube = sum(cube.pow_cube, [3 4]);
+%TODO: RUN CFAR FOR EACH AZIMUTH SWATH?
+rd_cube = sum(cube.pow_cube, 3);
 
 % Estimate noise power
 detection.noise_pow = pow2db(median(mean(rd_cube), 'all'));

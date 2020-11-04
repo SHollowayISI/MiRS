@@ -1,17 +1,13 @@
-function [detection] = DetectionMultiple_PANUAS(scenario)
-%DETECTIONMULTIPLE_PANUAS Summary of this function goes here
-%   Detailed explanation goes here
+function [detection] = DetectionMultiple(scenario)
+%DETECTIONMULTIPLE Performs multiple-CPI detection for MiRS project
+%   Takes scenario object as input, provides scenario.detection object as
+%   output, containing information about detected targets.
 
 %% Unpack Variables
 
 detection = scenario.detection;
 radarsetup = scenario.radarsetup;
 cube = scenario.cube;
-
-% Load angular offset
-load_in = load('Resources\AngleDopplerOffset.mat');
-offset_angle = load_in.offset_smooth;
-offset_vel = load_in.vel_axis;
 
 %% Perform Binary Integration
 
@@ -23,7 +19,7 @@ avg_cube = bw_cube .* (detection.pow_cube_multi ./ detection.detect_cube_multi);
 avg_cube(isnan(avg_cube)) = 0;
 
 % Sum over angle information
-rd_cube = sum(avg_cube, [3 4]);
+rd_cube = sum(avg_cube, 3);
 
 %% Determine Individual Object Coordinates
 
@@ -55,14 +51,6 @@ for n = 1:length(regions)
     detection.detect_list.vel(end+1) = interp1(cube.vel_axis, regions(n).WeightedCentroid(1));
     detection.detect_list.az(end+1) = interp1(cube.azimuth_axis, ang_rgn.WeightedCentroid(1));
     detection.detect_list.el(end+1) = interp1(cube.elevation_axis, ang_rgn.WeightedCentroid(2));
-    
-    % Correct TDM angle-doppler association
-    if strcmp(radarsetup.mimo_type, 'TDM')
-        detection.detect_list.az(end) = detection.detect_list.az(end) - ...
-            interp1(offset_vel, offset_angle(:,1), detection.detect_list.vel(end), 'linear', 'extrap');
-        detection.detect_list.el(end) = detection.detect_list.el(end) - ...
-            interp1(offset_vel, offset_angle(:,2), detection.detect_list.vel(end), 'linear', 'extrap');
-    end
     
     % Store derived coordinates
     detection.detect_list.cart(:,end+1) = detection.detect_list.range(end) * ...
