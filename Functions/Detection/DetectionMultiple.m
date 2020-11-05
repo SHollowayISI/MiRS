@@ -12,7 +12,7 @@ cube = scenario.cube;
 %% Perform Binary Integration
 
 % Find over-threshold detections
-bw_cube = (detection.detect_cube_multi > radarsetup.det_m);
+bw_cube = (detection.detect_cube_multi >= radarsetup.det_m);
 
 % Average power for multiple-detection indices
 avg_cube = bw_cube .* (detection.pow_cube_multi ./ detection.detect_cube_multi);
@@ -30,36 +30,25 @@ regions = regionprops(cc, rd_cube, 'WeightedCentroid');
 % Generate list of detection coordinates
 detection.detect_list.range = [];
 detection.detect_list.vel = [];
-detection.detect_list.az = [];
-detection.detect_list.el = [];
 detection.detect_list.cart = [];
 detection.detect_list.SNR = [];
 detection.detect_list.num_detect = length(regions);
 
-% Reshape power cube to match index format
-shape_cube = reshape(avg_cube, [], ...
-    length(cube.azimuth_axis), length(cube.elevation_axis));
-
 % Determine Centroid of azimuth-elevation slice
 for n = 1:length(regions)
-    % Obtain coordinate approximations
-    alez = squeeze(sum(shape_cube(cc.PixelIdxList{n}, :, :), 1));
-    ang_rgn = regionprops(true(size(alez)), alez, 'WeightedCentroid');
     
     % Store direct coordinates
     detection.detect_list.range(end+1) = interp1(cube.range_axis, regions(n).WeightedCentroid(2));
     detection.detect_list.vel(end+1) = interp1(cube.vel_axis, regions(n).WeightedCentroid(1));
-    detection.detect_list.az(end+1) = interp1(cube.azimuth_axis, ang_rgn.WeightedCentroid(1));
-    detection.detect_list.el(end+1) = interp1(cube.elevation_axis, ang_rgn.WeightedCentroid(2));
     
     % Store derived coordinates
-    detection.detect_list.cart(:,end+1) = detection.detect_list.range(end) * ...
-        [cosd(detection.detect_list.el(end)) * cosd(detection.detect_list.az(end)); ...
-        cosd(detection.detect_list.el(end)) * sind(detection.detect_list.az(end));
-        sind(detection.detect_list.el(end))];
+%     detection.detect_list.cart(:,end+1) = detection.detect_list.range(end) * ...
+%         [cosd(detection.detect_list.el(end)) * cosd(detection.detect_list.az(end)); ...
+%         cosd(detection.detect_list.el(end)) * sind(detection.detect_list.az(end));
+%         sind(detection.detect_list.el(end))];
     
     % Store SNR
-    detection.detect_list.SNR(end+1) = 10*log10(max(alez, [], 'all')) ...
+    detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube, [], 'all')) ...
         - detection.noise_pow;
 end
 

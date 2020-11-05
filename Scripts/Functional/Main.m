@@ -39,8 +39,7 @@ for loop = 1:scenario.simsetup.num_frames
         %% Single CPI Data Processing
         
         % Perform single-frame radar detection
-        %TODO: NEW DETECTION METHOD
-%         scenario.detection = DetectionSingle(scenario);
+        scenario.detection = DetectionSingle(scenario);
         
         %% Loop Update Procedures
         
@@ -55,7 +54,7 @@ for loop = 1:scenario.simsetup.num_frames
     %% Multiple CPI Data Processing
     
     %TODO: UPDATE ALL
-    %{
+    %
     % Perform binary integration and coordinate determination
     scenario.detection = DetectionMultiple(scenario);
     
@@ -68,7 +67,7 @@ for loop = 1:scenario.simsetup.num_frames
     saveMulti(scenario);
     
     % Update multi-target tracking system
-    scenario.multi = Tracking(scenario);
+%     scenario.multi = Tracking(scenario);
     %}
     
     %% Single Slice Visualization

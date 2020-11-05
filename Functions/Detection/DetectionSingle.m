@@ -13,7 +13,6 @@ flags = scenario.flags;
 %% Perform Detection
 
 % Sum across angle slices
-%TODO: RUN CFAR FOR EACH AZIMUTH SWATH?
 rd_cube = sum(cube.pow_cube, 3);
 
 % Estimate noise power
@@ -52,7 +51,8 @@ switch radarsetup.detect_type
         
         % Perform image dilation
         if radarsetup.dilate
-            se = strel('disk', 1);
+            str = ['se = strel(radarsetup.dilate_shape, ', radarsetup.dilate_args, ');'];
+            eval(str);
             cfar_out = imdilate(cfar_out, se);
         end
         

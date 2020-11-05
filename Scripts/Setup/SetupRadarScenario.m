@@ -15,12 +15,12 @@ scenario.radarsetup = struct( ...
     ...
     ... % Waveform Properties
     'f_c',          78.5e9, ...             % Operating frequency in Hz
-    'f_s',          40e6, ...               % ADC sample frequency in Hz
-    't_ch',         1.0e-3, ...             % Chirp duration in seconds
+    'f_s',          45e6, ...               % ADC sample frequency in Hz
+    't_ch',         1.6e-3, ...             % Chirp duration in seconds
     'bw',           5.0e9, ...              % Chirp bandwidth in Hz
-    'n_p',          32, ...                  % Number of (MIMO) chirps per CPI
-    'drop_s',       0, ...                  % Number of samples to drop
-    'cpi_fr',       1, ...                  % Number of CPI per frame
+    'n_p',          64, ...                 % Number of (MIMO) chirps per CPI
+    'drop_s',       7200, ...               % Number of samples to drop
+    'cpi_fr',       10, ...                  % Number of CPI per frame
     ...
     ... % Antenna Array Properties
     'n_tx',         2, ...                  % Number of elements in horizontal Tx array
@@ -35,12 +35,24 @@ scenario.radarsetup = struct( ...
     ...
     ... % Antenna Properties
     'ant_gain',     db2pow(10), ...         % Antenna gain in absolute
-    'ant_cos_pow',  [1 10], ...              % Cosine power of antenna pattern
+    'ant_cos_pow',  [1 10], ...             % Cosine power of antenna pattern
     ...
     ... % Processing Properties
     'r_win',        'hanning', ...          % Window for range processing
-    'd_win',        'blackmanharris', ...   % Window for doppler processing
-    'az_win',       'hanning');             % Window for azimuth processing
+    'd_win',        'hanning', ...          % Window for doppler processing
+    'az_win',       'hanning', ...          % Window for azimuth processing
+    ...
+    ... % Detection Properties
+    'detect_type',  'CFAR', ...             % Choose 'CFAR' or 'threshold'
+    'thresh',       [], ...                 % Threshold in dB for threshold detection
+    'CFAR_Pfa',     10^-6, ...              % CFAR false alarm probability
+    'num_guard',    [5 3], ...              % Number of R-D guard cells for CFAR detection
+    'num_train',    [25 3], ...             % Number of R-D training cells for CFAR detection
+    'dilate',       false, ...               % T/F dilate raw CFAR result to avoid duplicates 
+    'dilate_shape', 'line', ...             % Shape to dilate raw CFAR results
+    'dilate_args',  '3, 90', ...            % Arguments in strel function for dilation
+    'det_m',        2);                     % M for m-of-n binary integration
+
 
 %% Run Setup Scripts
 
