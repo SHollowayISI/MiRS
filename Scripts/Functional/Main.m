@@ -70,6 +70,11 @@ for loop = 1:scenario.simsetup.num_frames
 %     scenario.multi = Tracking(scenario);
     %}
     
+    % Print out ideal SNR
+    idealSNR = CalculateSNR(scenario, scenario.target_list.rcs, ...
+        sqrt(sum(scenario.target_list.pos.^2)));
+    disp(idealSNR);
+    
     %% Single Slice Visualization
     
     %{

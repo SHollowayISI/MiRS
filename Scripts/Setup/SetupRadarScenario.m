@@ -20,7 +20,7 @@ scenario.radarsetup = struct( ...
     'bw',           5.0e9, ...              % Chirp bandwidth in Hz
     'n_p',          64, ...                 % Number of (MIMO) chirps per CPI
     'drop_s',       7200, ...               % Number of samples to drop
-    'cpi_fr',       10, ...                  % Number of CPI per frame
+    'cpi_fr',       1, ...                 % Number of CPI per frame
     ...
     ... % Antenna Array Properties
     'n_tx',         2, ...                  % Number of elements in horizontal Tx array
@@ -51,7 +51,7 @@ scenario.radarsetup = struct( ...
     'dilate',       false, ...               % T/F dilate raw CFAR result to avoid duplicates 
     'dilate_shape', 'line', ...             % Shape to dilate raw CFAR results
     'dilate_args',  '3, 90', ...            % Arguments in strel function for dilation
-    'det_m',        2);                     % M for m-of-n binary integration
+    'det_m',        1);                     % M for m-of-n binary integration
 
 
 %% Run Setup Scripts

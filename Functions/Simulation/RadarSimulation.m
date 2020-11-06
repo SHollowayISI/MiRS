@@ -41,8 +41,12 @@ for block = 1:radarsetup.n_p
         % Get range and angle to all targets
         [~, tgt_ang] = rangeangle(target_list.pos, simsetup.radar_pos);
         
+        % Set up weights to implement TDM-MIMO
+        weights = [0; 0];
+        weights(chirp) = 1;
+        
         % Radiate signal towards all targets
-        sig = sim.radiator(tx_sig, tgt_ang);
+        sig = sim.radiator(tx_sig, tgt_ang, weights);
         
         % Propogate signal to the target through two-way channel
         sig = sim.channel(sig, ...
