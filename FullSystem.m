@@ -14,6 +14,8 @@
                 * Remove elevation swaths
         - RadarScenario:
             + Go through each method and remove/modify
+        - DetectionSingle:
+            + Adjust CFAR parameters for no false alarms at ~50m
 
     NEXT STEPS:
         - Modify to multi-static version

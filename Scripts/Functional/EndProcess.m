@@ -14,6 +14,14 @@
 elapsedTime = toc;
 fprintf('\nElapsed time is %d minutes and %d seconds\n', floor(elapsedTime/60), floor(mod(elapsedTime,60)))
 
+%% Delete Parallel Pool
+
+if scenario.simsetup.close_pool
+    if ~isempty(gcp('nocreate'))
+        delete(gcp('nocreate'))
+    end
+end
+
 %% Save Files and Figures
 
 % Establish file name

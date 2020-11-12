@@ -19,8 +19,15 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-ranges = 400:100:600;
-iterations = 2;
+ranges = 50:50:1000;
+iterations = 20;
+
+% Initialize outputs
+range_out = zeros(length(ranges), iterations);
+vel_out = range_out;
+az_out = range_out;
+snr_out = range_out;
+snr_calc = zeros(length(ranges), 1);
 
 for n = 1:length(ranges)
     
@@ -55,18 +62,42 @@ for n = 1:length(ranges)
         %% Collect Data From Test Loop
         
         % Output parameters here
-        [~, ind] = min(abs(scenario.detection.detect_list.range - ranges(n)));
-        range_out(n, m) = scenario.detection.detect_list.range(ind);
+        if scenario.detection.detect_list.num_detect > 0
+            [~, ind] = min(abs(scenario.detection.detect_list.range - ranges(n)));
+            range_out(n, m) = scenario.detection.detect_list.range(ind);
+            vel_out(n, m) = scenario.detection.detect_list.vel(ind);
+            az_out(n, m) = scenario.detection.detect_list.az(ind);
+            snr_out(n, m) = scenario.detection.detect_list.SNR(ind);
+        else
+            range_out(n, m) = nan;
+            vel_out(n, m) = nan;
+            az_out(n, m) = nan;
+            snr_out(n, m) = nan;
+        end
+        
         
     end
+    
+    % Save ideal SNR
+    snr_calc(n) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
+    
 end
 
 %% Test Result Calculation and Visualization
 
+% Save results
+save('Data/MAT Files/ErrorTest.mat', 'range_out', 'vel_out', 'az_out', 'snr_out', 'snr_calc');
+
 % Mean and variance
 range_mean = mean(range_out, 2, 'omitnan');
 range_var = var(range_out, [], 2, 'omitnan');
-range_error = range_mean - ranges;
+range_error = range_mean - ranges';
+
+vel_var = var(vel_out, [], 2, 'omitnan');
+vel_error = mean(vel_out, 2, 'omitnan');
+
+az_var = var(az_out, [], 2, 'omitnan');
+az_error = mean(az_out, 2, 'omitnan');
 
 % Plot results
 figure;
@@ -74,6 +105,19 @@ plot(range_error);
 hold on;
 plot(range_var);
 grid on;
+
+figure;
+plot(vel_error);
+hold on;
+plot(vel_var);
+grid on;
+
+figure;
+plot(az_error);
+hold on;
+plot(az_var);
+grid on;
+
 
 %% Save and Package Resultant Data
 

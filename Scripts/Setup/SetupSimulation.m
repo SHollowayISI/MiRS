@@ -24,8 +24,13 @@ scenario.simsetup = struct( ...
     'num_frames',   1, ...                      % Number of radar frames to simulate
     'readout',      true, ...                   % Read out target data T/F
     ...
+    ... % Processing Properties
+    'par_test',     false, ...                   % Parallelize test loop
+    'par_cfar',     true, ...                  % Parallelize CFAR detection
+    'close_pool',   false, ...                  % Exit parallel pool at end
+    ...
     'sim_rate',     2^0, ...                    % Rate to divide fast x slow time simulation
-    'clear_cube',   false, ...
+    'clear_cube',   true, ...
     'send_alert',   false, ...                  % Send email alert T/F
     'attach_zip',   false, ...
     'alert_address', 'sholloway@intellisenseinc.com', ...
@@ -36,6 +41,14 @@ scenario.simsetup = struct( ...
     'save_mat',     false, ...                  % Save mat file T/F
     'reduce_mat',   false);                     % Reduce mat file for saving
 
+
+%% Start Parallel Pool
+
+if (scenario.simsetup.par_cfar || scenario.simsetup.par_test)
+    if(isempty(gcp('nocreate')))
+        parpool;
+    end
+end
 
 
 

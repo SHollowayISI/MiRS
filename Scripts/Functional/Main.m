@@ -39,7 +39,11 @@ for loop = 1:scenario.simsetup.num_frames
         %% Single CPI Data Processing
         
         % Perform single-frame radar detection
-        scenario.detection = DetectionSingle(scenario);
+        if scenario.simsetup.par_cfar
+            scenario.detection = DetectionSingle_Parallel(scenario);
+        else
+            scenario.detection = DetectionSingle(scenario);
+        end
         
         %% Loop Update Procedures
         
