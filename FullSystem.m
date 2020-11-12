@@ -8,24 +8,17 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-    - Main:
-        + Update all files from PAN-UAS version
-        + GenerateCoordinates:
-            * Remove or modify this
-        + DetectionSingle:
-            * Ask Victor how to combine channels
-        + DetectionMultiple:
-            * New detection method for MiRS
-            * Remove elevation dimension
-        + Visualization methods:
-            * Remove elevation swaths
-    - RadarScenario:
-        + Go through each method and remove/modify
+        - Main:
+            + Update all files from PAN-UAS version
+            + Visualization methods:
+                * Remove elevation swaths
+        - RadarScenario:
+            + Go through each method and remove/modify
 
     NEXT STEPS:
-    - Modify to multi-static version
-        + Associate targets with transceivers
-        + Implement target trajectory
+        - Modify to multi-static version
+            + Associate targets with transceivers
+            + Implement target trajectory
 %}
 
 %% Housekeeping, Timing, and Path Management

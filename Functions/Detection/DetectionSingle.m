@@ -65,7 +65,7 @@ for angle_slice = 1:(size(cube.pow_cube, 3)-1)
 end
 
 % Wrap ends of angle FFT
-detection.detect_cube(:,:,end+1) = detection.detect_cube(:,:,1);
+detection.detect_cube(:,:,size(cube.pow_cube, 3)) = detection.detect_cube(:,:,1);
 
 %% Update Multiple CPI List
 

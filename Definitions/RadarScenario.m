@@ -82,7 +82,11 @@ classdef RadarScenario < handle
             estComplete = nowTimeDate + ((100/percent_complete)-1)*elapsedTime;
             
             % Form message to display in command window
-            message_l = sprintf('%d Loops complete out of %d', loops_complete, RadarScenario.timing.numLoops);
+            if loops_complete > 1
+                message_l = sprintf('%d Loops complete out of %d', loops_complete, RadarScenario.timing.numLoops);
+            else
+                message_l = sprintf('%d Loop complete out of %d', loops_complete, RadarScenario.timing.numLoops);
+            end
             message_p = [sprintf('Percent complete: %0.0f', percent_complete), '%'];
             message_t = ['Estimated time of completion: ', datestr(estComplete)];
             
@@ -109,7 +113,7 @@ classdef RadarScenario < handle
         end
         
         function CPIUpdate(RadarScenario)
-            message = sprintf('CPI %d complete out of %d per frame.', ...
+            message = sprintf('\nCPI %d complete out of %d per frame.', ...
                 RadarScenario.flags.cpi, ...
                 RadarScenario.radarsetup.cpi_fr);
             disp(message);
@@ -121,9 +125,9 @@ classdef RadarScenario < handle
             
             if num_detect > 0
                 if num_detect > 1
-                    fprintf('\n%d Targets Detected:\n\n', num_detect);
+                    fprintf('\n%d Targets Detected:\n', num_detect);
                 else
-                    fprintf('\n%d Target Detected:\n\n', num_detect);
+                    fprintf('\n%d Target Detected:\n', num_detect);
                 end
                 
                 for n = 1:num_detect
@@ -142,9 +146,11 @@ classdef RadarScenario < handle
                 disp('');
             end
             
-            idealSNR = CalculateSNR(RadarScenario, RadarScenario.target_list.rcs, ...
-                sqrt(sum(RadarScenario.target_list.pos.^2)));
-            fprintf('\nIdeal SNR: %0.1f\n', idealSNR);
+            if length(RadarScenario.target_list.rcs) == 1
+                idealSNR = CalculateSNR(RadarScenario, RadarScenario.target_list.rcs, ...
+                    sqrt(sum(RadarScenario.target_list.pos.^2)));
+                fprintf('\nIdeal SNR of Target: %0.1f\n', idealSNR);
+            end
             
         end
         

@@ -11,7 +11,8 @@
 
 %% Announce Elapsed Time
 
-toc
+elapsedTime = toc;
+fprintf('\nElapsed time is %d minutes and %d seconds\n', floor(elapsedTime/60), floor(mod(elapsedTime,60)))
 
 %% Save Files and Figures
 
