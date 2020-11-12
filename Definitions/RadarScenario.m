@@ -116,9 +116,7 @@ classdef RadarScenario < handle
         end
         
         function readOut(RadarScenario)
-%             fprintf('\nMaximum SNR: %0.1f [dB]\n', ...
-%                 RadarScenario.detection.max_SNR);
-            
+
             num_detect = RadarScenario.detection.detect_list.num_detect;
             
             if num_detect > 0
@@ -129,18 +127,25 @@ classdef RadarScenario < handle
                 end
                 
                 for n = 1:num_detect
-                    fprintf('Target #%d Coordinates:\n', n);
+                    fprintf('\nTarget #%d Coordinates:\n', n);
                     fprintf('Range: %0.2f [m]\n', ...
                         RadarScenario.detection.detect_list.range(n));
                     fprintf('Velocity: %0.2f [m/s]\n', ...
                         RadarScenario.detection.detect_list.vel(n));
+                    fprintf('Bearing: %0.2f [deg]\n', ...
+                        RadarScenario.detection.detect_list.az(n));
                     fprintf('SNR: %0.1f [dB]\n', ...
                         RadarScenario.detection.detect_list.SNR(n));
                 end
             else
-                disp('No Targets Detected');
+                disp('\nNo Targets Detected\n');
                 disp('');
             end
+            
+            idealSNR = CalculateSNR(RadarScenario, RadarScenario.target_list.rcs, ...
+                sqrt(sum(RadarScenario.target_list.pos.^2)));
+            fprintf('\nIdeal SNR: %0.1f\n', idealSNR);
+            
         end
         
         function saveMulti(RadarScenario)

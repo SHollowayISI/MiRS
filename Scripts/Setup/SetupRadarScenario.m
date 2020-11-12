@@ -20,7 +20,7 @@ scenario.radarsetup = struct( ...
     'bw',           5.0e9, ...              % Chirp bandwidth in Hz
     'n_p',          64, ...                 % Number of (MIMO) chirps per CPI
     'drop_s',       7200, ...               % Number of samples to drop
-    'cpi_fr',       1, ...                 % Number of CPI per frame
+    'cpi_fr',       1, ...                  % Number of CPI per frame
     ...
     ... % Antenna Array Properties
     'n_tx',         2, ...                  % Number of elements in horizontal Tx array
@@ -41,13 +41,14 @@ scenario.radarsetup = struct( ...
     'r_win',        'hanning', ...          % Window for range processing
     'd_win',        'hanning', ...          % Window for doppler processing
     'az_win',       'hanning', ...          % Window for azimuth processing
+    'n_az',         16, ...                 % 
     ...
     ... % Detection Properties
     'detect_type',  'CFAR', ...             % Choose 'CFAR' or 'threshold'
     'thresh',       [], ...                 % Threshold in dB for threshold detection
     'CFAR_Pfa',     10^-6, ...              % CFAR false alarm probability
-    'num_guard',    [5 3], ...              % Number of R-D guard cells for CFAR detection
-    'num_train',    [25 3], ...             % Number of R-D training cells for CFAR detection
+    'num_guard',    [5 1], ...              % Number of R-D guard cells for CFAR detection
+    'num_train',    [25 5], ...             % Number of R-D training cells for CFAR detection
     'dilate',       false, ...               % T/F dilate raw CFAR result to avoid duplicates 
     'dilate_shape', 'line', ...             % Shape to dilate raw CFAR results
     'dilate_args',  '3, 90', ...            % Arguments in strel function for dilation

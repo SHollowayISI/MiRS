@@ -8,8 +8,6 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-    - General:
-        + Verify SNR
     - Main:
         + Update all files from PAN-UAS version
         + GenerateCoordinates:
@@ -63,8 +61,6 @@ Main
 
 % Run all end-of-process tasks
 EndProcess
-
-
 
 
 

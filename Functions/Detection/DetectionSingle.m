@@ -16,9 +16,9 @@ flags = scenario.flags;
 detection.noise_pow = pow2db(median(mean(cube.pow_cube, 1), 'all'));
 
 % Loop across angle slices
-for angle_slice = 1:1%size(cube.pow_cube, 3)
+for angle_slice = 1:(size(cube.pow_cube, 3)-1)
     
-    rd_cube = cube.pow_cube(:,:,5);%,angle_slice);
+    rd_cube = cube.pow_cube(:,:,angle_slice);
     
     switch radarsetup.detect_type
         case 'threshold'
@@ -63,6 +63,9 @@ for angle_slice = 1:1%size(cube.pow_cube, 3)
             
     end
 end
+
+% Wrap ends of angle FFT
+detection.detect_cube(:,:,end+1) = detection.detect_cube(:,:,1);
 
 %% Update Multiple CPI List
 
