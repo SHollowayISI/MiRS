@@ -20,8 +20,8 @@ StartProcess;
 
 % Test parameters described here
 bearings = 0:5:90;
-range_in = 500;
-iterations = 1;
+range_in = 250;
+iterations = 10;
 
 % Initialize outputs
 range_out = zeros(length(bearings), iterations);

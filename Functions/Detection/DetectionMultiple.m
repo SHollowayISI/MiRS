@@ -53,9 +53,6 @@ for n = 1:length(regions)
     detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube(cc.PixelIdxList{n}), [], 'all')) ...
         - detection.noise_pow;
     
-    % Determine range-doppler indices of detections
-    
-    
     % Find angle of attack using AoA estimator
     ant_slice = squeeze(scenario.cube.rd_cube(round(ind(2)), round(ind(1)), :))';
     [~, detection.detect_list.aoa(end+1)] = sim.AoA(ant_slice);
