@@ -90,7 +90,7 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
-save('Data/MAT Files/AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
+save('MAT Files/Data/AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
 
 % Mean and variance
 range_mean = mean(range_out, 2, 'omitnan');
