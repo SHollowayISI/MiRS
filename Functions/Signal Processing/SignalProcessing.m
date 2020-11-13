@@ -53,7 +53,11 @@ cube.rd_cube(:,(end+1),:) = cube.rd_cube(:,1,:);
 %% Perform Angle FFTs
 
 % Calculate FFT size 
-N_az = 2^ceil(log2(size(cube.rd_cube, 3)));
+if isempty(radarsetup.n_az)
+    N_az = 2^ceil(log2(size(cube.rd_cube, 3)));
+else
+    N_az = radarsetup.n_az;
+end
 
 
 % Apply elevation windowing

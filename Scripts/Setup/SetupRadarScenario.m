@@ -41,7 +41,8 @@ scenario.radarsetup = struct( ...
     'r_win',        'hanning', ...          % Window for range processing
     'd_win',        'hanning', ...          % Window for doppler processing
     'az_win',       'hanning', ...          % Window for azimuth processing
-    'n_az',         16, ...                 % 
+    'n_az',         16, ...                 % Size of azimuth FFT
+    'v_az_coeff',   -18.1246, ...           % Velocity-Bearing coupling in degree per meter per second
     ...
     ... % Detection Properties
     'detect_type',  'CFAR', ...             % Choose 'CFAR' or 'threshold'

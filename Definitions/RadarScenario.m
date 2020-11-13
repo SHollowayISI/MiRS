@@ -32,27 +32,6 @@ classdef RadarScenario < handle
             
             RadarScenario.detection.detect_cube_multi = [];
         end
-       
-        function generateCoordinates(RadarScenario)
-            %Generate Input Coordinate Grid
-            [range_grid, azimuth_grid, elevation_grid] = meshgrid( ...
-                RadarScenario.cube.range_axis, ...
-                RadarScenario.cube.azimuth_axis, ...
-                RadarScenario.cube.elevation_axis);
-            %Generate Output Coordinate Grid
-            RadarScenario.results.x_grid = ...
-                permute( ...
-                range_grid .* cosd(azimuth_grid) .* cosd(elevation_grid), ...
-                [2 1 3]);
-            RadarScenario.results.y_grid = ...
-                permute( ...
-                range_grid .* sind(azimuth_grid) .* cosd(elevation_grid), ...
-                [2 1 3]);
-            RadarScenario.results.z_grid = ...
-                permute( ...
-                range_grid .* sind(elevation_grid), ...
-                [2 1 3]);
-        end
         
         function timeStart(RadarScenario)
             % Begin timing for progress readout
@@ -113,10 +92,9 @@ classdef RadarScenario < handle
         end
         
         function CPIUpdate(RadarScenario)
-            message = sprintf('\nCPI %d complete out of %d per frame.', ...
+            fprintf('\nCPI %d complete out of %d per frame.\n', ...
                 RadarScenario.flags.cpi, ...
                 RadarScenario.radarsetup.cpi_fr);
-            disp(message);
         end
         
         function readOut(RadarScenario)
@@ -136,15 +114,13 @@ classdef RadarScenario < handle
                         RadarScenario.detection.detect_list.range(n));
                     fprintf('Velocity: %0.2f [m/s]\n', ...
                         RadarScenario.detection.detect_list.vel(n));
-                    fprintf('Bearing (FFT): %0.2f [deg]\n', ...
-                        RadarScenario.detection.detect_list.az(n));
-                    fprintf('Bearing (AoA): %0.2f [deg]\n', ...
+                    fprintf('Bearing: %0.2f [deg]\n', ...
                         RadarScenario.detection.detect_list.aoa(n));
                     fprintf('SNR: %0.1f [dB]\n', ...
                         RadarScenario.detection.detect_list.SNR(n));
                 end
             else
-                fprintf('\nNo Targets Detected\n\n');
+                fprintf('\nNo Targets Detected\n');
             end
             
             if length(RadarScenario.target_list.rcs) == 1
@@ -163,19 +139,29 @@ classdef RadarScenario < handle
         end
         
         function viewTargets(RadarScenario)
-            % Show 3-D scatter plot of target locations
-            figure('Name', 'Target 3D Scatter Plot')
-            scatter3(RadarScenario.target_list.pos(1,:), ...
-                RadarScenario.target_list.pos(2,:), ...
-                RadarScenario.target_list.pos(3,:))
+            % Find axis limits
+            max_dist = sqrt(max(sum(RadarScenario.target_list.pos(1:2,:).^2, 1)));
+            % Show 3-D scatter plot of target locations and transceiver
+            figure('Name', 'Target Scatter Plot')
+            scatter(RadarScenario.target_list.pos(2,:), ...
+                RadarScenario.target_list.pos(1,:))
+            hold on;
+            scatter(RadarScenario.simsetup.radar_pos(2), ...
+                RadarScenario.simsetup.radar_pos(1), '.', 'r');
+            grid on;
+            xlim(max_dist * [-1 1])
+            ylim(max_dist * [0 2])
+            title('Target Scatter Plot')
+            xlabel('Cross-Range Distance [m]','FontWeight','bold')
+            ylabel('Down-Range Distance [m]','FontWeight','bold')
         end
         
-        function viewRDCube(RadarScenario, graphType)
+        function viewRDCube(RadarScenario, angleSlice, graphType)
             if strcmp(graphType, 'heatmap')
                 figure('Name', 'Range-Doppler Heat Map');
                 imagesc(RadarScenario.cube.vel_axis, ...
                     RadarScenario.cube.range_axis, ...
-                    10*log10(RadarScenario.cube.pow_cube(:,:,ceil(end/2), ceil(end/2))))
+                    10*log10(RadarScenario.cube.pow_cube(:,:,angleSlice)))
                 title('Range-Doppler Heat Map')
                 set(gca,'YDir','normal')
                 xlabel('Velocity [m/s]','FontWeight','bold')
@@ -184,7 +170,7 @@ classdef RadarScenario < handle
                 figure('Name', 'Range-Doppler Surface');
                 surf(RadarScenario.cube.vel_axis, ...
                     RadarScenario.cube.range_axis, ...
-                    10*log10(RadarScenario.cube.pow_cube(:,:,ceil(end/2), ceil(end/2))), ...
+                    10*log10(RadarScenario.cube.pow_cube(:,:,angleSlice)), ...
                     'EdgeColor', 'none')
                 title('Range-Doppler Surface')
                 set(gca,'YDir','normal')
@@ -195,13 +181,13 @@ classdef RadarScenario < handle
             
         end
         
-        function viewRACube(RadarScenario, graphType)
+        function viewRACube(RadarScenario, dopplerSlice, graphType)
             switch graphType
                 case 'heatmap'
                     figure('Name', 'Range-Azimuth Heat Map');
                     imagesc(RadarScenario.cube.azimuth_axis, ...
                         RadarScenario.cube.range_axis, ...
-                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,ceil(end/2),:, ceil(end/2)))))
+                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,dopplerSlice,:))))
                     title('Range-Azimuth Heat Map')
                     set(gca,'YDir','normal')
                     xlabel('Azimuth Angle [degree]','FontWeight','bold')
@@ -210,17 +196,20 @@ classdef RadarScenario < handle
                     figure('Name', 'Range-Azimuth Surface');
                     surf(RadarScenario.cube.azimuth_axis, ...
                         RadarScenario.cube.range_axis, ...
-                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,ceil(end/2),:, ceil(end/2)))), ...
+                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,dopplerSlice,:))), ...
                         'EdgeColor', 'none')
                     title('Range-Azimuth Surface')
                     xlabel('Azimuth Angle [degree]','FontWeight','bold')
                     ylabel('Range [m]','FontWeight','bold')
                     zlabel('FFT Log Intensity [dB]','FontWeight','bold')
                 case 'PPI'
+                    % Generate coordinate grid
+                    
+                    % Plot PPI along coordinate grid
                     figure('Name', 'Range-Azimuth PPI');
                     surf(RadarScenario.cube.x_grid, ...
                         RadarScenario.cube.y_grid, ...
-                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,ceil(end/2),:, ceil(end/2)))), ...
+                        10*log10(squeeze(RadarScenario.cube.pow_cube(:,dopplerSlice,:))), ...
                         'EdgeColor', 'none')
                     title('Range-Azimuth PPI')
                     xlabel('Cross-Range Distance [m]','FontWeight','bold')
@@ -234,45 +223,43 @@ classdef RadarScenario < handle
             switch graphType
                 case 'heatmap'
                     figure('Name', 'Detection Heatmap')
-                    imagesc(RadarScenario.cube.vel_axis, ...
+                    imagesc(RadarScenario.cube.azimuth_axis, ...
                         RadarScenario.cube.range_axis, ...
-                        RadarScenario.detection.detect_cube( ...
-                        :, :, ceil(end/2), ceil(end/2)))
+                        squeeze(any((RadarScenario.detection.detect_cube_multi >= RadarScenario.radarsetup.det_m), 2)))
                     set(gca, 'YDir', 'Normal')
-                    xlabel('Velocity [m/s]', 'FontWeight', 'bold')
+                    title('Detection Heatmap')
+                    xlabel('Bearing [degree]', 'FontWeight', 'bold')
                     ylabel('Ragne [m]', 'FontWeight', 'bold')
                 case 'PPI'
+                    % Generate coordinate grid
+                    x_grid = RadarScenario.cube.range_axis' .* cosd(RadarScenario.cube.azimuth_axis);
+                    y_grid = RadarScenario.cube.range_axis' .* sind(RadarScenario.cube.azimuth_axis);
+                    % Plot PPI along coordinate grid
                     figure('Name', 'Detection PPI');
-                    surf(RadarScenario.cube.x_grid, ...
-                        RadarScenario.cube.y_grid, ...
-                        RadarScenario.detection.detect_cube_nodop( ...
-                        :, :, RadarScenario.flags.slice), ...
+                    surf(x_grid, y_grid, ...
+                        int8(squeeze(any((RadarScenario.detection.detect_cube_multi >= RadarScenario.radarsetup.det_m), 2))), ...
                         'EdgeColor', 'none')
                     view(270,90)
-                    title('Range-Azimuth PPI')
+                    title('Detection PPI')
                     xlabel('Cross-Range Distance [m]','FontWeight','bold')
                     ylabel('Down-Range Distance [m]','FontWeight','bold')
-                    zlabel('FFT Log Intensity [dB]','FontWeight','bold')
+                case 'scatter'
+                    % Find axis limits
+                    max_dist = sqrt(max(sum(RadarScenario.detection.detect_list.cart.^2, 1)));
+                    % Plot scatter plot of detections
+                    figure('Name', 'Detection Scatter Plot')
+                    scatter(RadarScenario.detection.detect_list.cart(2,:), ...
+                        RadarScenario.detection.detect_list.cart(1,:));
+                    hold on;
+                    scatter(RadarScenario.simsetup.radar_pos(2), ...
+                        RadarScenario.simsetup.radar_pos(1), '.', 'r');
+                    grid on;
+                    title('Detection Scatter Plot')
+                    xlim(max_dist * [-1 1])
+                    ylim(max_dist * [0 2])
+                    xlabel('Cross-Range Distance [m]','FontWeight','bold')
+                    ylabel('Down-Range Distance [m]','FontWeight','bold')
             end
-        end
-        
-        function viewDetections3D(RadarScenario)
-            % Pass in variable
-            detect_list = RadarScenario.multi.detect_list;
-            % Show 3-D scatter plot of detections
-            figure('Name', 'Detections 3D Scatter Plot')
-            for n = 1:length(detect_list)
-                scatter3(detect_list{n}.cart(1,:), ...
-                    detect_list{n}.cart(2,:), ...
-                    detect_list{n}.cart(3,:), ...
-                    'k', '+');
-                hold on;
-            end
-            title('Detections 3D Scatter Plot')
-            xlabel('Down-Range Distance [m]', 'FontWeight', 'bold')
-            ylabel('Cross-Range Distance [m]', 'FontWeight', 'bold')
-            zlabel('Elevation [m]', 'FontWeight', 'bold')
-            
         end
         
         function viewTracking(RadarScenario)

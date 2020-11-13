@@ -8,22 +8,16 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-        - Main:
-            + Update all files from PAN-UAS version
-            + Visualization methods:
-                * Remove elevation swaths
-        - RadarScenario:
-            + Go through each method and remove/modify
-        - DetectionMulti:
-            + AoA averaging
-            + Final AoA implementation
         - SignalProcessing:
-            + Adjust for 16-point angle FFT
+            + Estimate angle error per velocity
+        - Tracking:
+            + Implement
 
     NEXT STEPS:
         - Modify to multi-static version
             + Associate targets with transceivers
             + Implement target trajectory
+            + Loop through transceivers
 %}
 
 %% Housekeeping, Timing, and Path Management

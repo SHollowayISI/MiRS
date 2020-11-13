@@ -28,7 +28,6 @@ regions = regionprops(cc, avg_cube, 'WeightedCentroid');
 % Generate list of detection coordinates
 detection.detect_list.range = [];
 detection.detect_list.vel = [];
-detection.detect_list.az = [];
 detection.detect_list.aoa = [];
 detection.detect_list.cart = [];
 detection.detect_list.SNR = [];
@@ -43,19 +42,21 @@ for n = 1:length(regions)
     % Store direct coordinates
     detection.detect_list.range(end+1) = interp1(cube.range_axis, ind(2));
     detection.detect_list.vel(end+1) = interp1(cube.vel_axis, ind(1));
-    detection.detect_list.az(end+1) = interp1(cube.azimuth_axis, ind(3));
-    
-    % Store derived coordinates
-    detection.detect_list.cart(:,end+1) = detection.detect_list.range(end) * ...
-        [cosd(detection.detect_list.az(end)); sind(detection.detect_list.az(end))];
     
     % Store SNR
     detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube(cc.PixelIdxList{n}), [], 'all')) ...
-        - detection.noise_pow;
+        - detection.noise_pow;    
     
     % Find angle of attack using AoA estimator
     ant_slice = squeeze(scenario.cube.rd_cube(round(ind(2)), round(ind(1)), :))';
-    [~, detection.detect_list.aoa(end+1)] = sim.AoA(ant_slice);
+    [~, ang] = sim.AoA(ant_slice);
+    
+    % Correct velocity-bearing coupling due to TDM-MIMO
+    detection.detect_list.aoa(end+1) = ang - radarsetup.v_az_coeff * detection.detect_list.vel(end);
+    
+    % Store derived coordinates
+    detection.detect_list.cart(:,end+1) = detection.detect_list.range(end) * ...
+        [cosd(detection.detect_list.aoa(end)); sind(detection.detect_list.aoa(end))];
     
     % Search through previous detections for targets within group radius
     if radarsetup.rm_group
@@ -69,14 +70,13 @@ for n = 1:length(regions)
             % Check distance in each dimension
             dist = abs([detection.detect_list.range(m) - detection.detect_list.range(end), ...
                 detection.detect_list.vel(m) - detection.detect_list.vel(end), ...
-                detection.detect_list.az(m) - detection.detect_list.az(end)]);
+                detection.detect_list.aoa(m) - detection.detect_list.aoa(end)]);
             
             % If in radius, keep larger SNR of two
             if all(dist < radarsetup.rm_rad)
                 if detection.detect_list.SNR(m) < detection.detect_list.SNR(end)
                     detection.detect_list.range(m) = [];
                     detection.detect_list.vel(m) = [];
-                    detection.detect_list.az(m) = [];
                     detection.detect_list.aoa(m) = [];
                     detection.detect_list.cart(:,m) = [];
                     detection.detect_list.SNR(m) = [];
@@ -84,7 +84,6 @@ for n = 1:length(regions)
                 else
                     detection.detect_list.range(end) = [];
                     detection.detect_list.vel(end) = [];
-                    detection.detect_list.az(end) = [];
                     detection.detect_list.aoa(end) = [];
                     detection.detect_list.cart(:,end) = [];
                     detection.detect_list.SNR(end) = [];

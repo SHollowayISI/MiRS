@@ -19,19 +19,19 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-bearings = 0:5:90;
+vels = 0.05:0.05:0.2;
 range_in = 250;
 iterations = 10;
 
 % Initialize outputs
-range_out = zeros(length(bearings), iterations);
+range_out = zeros(length(vels), iterations);
 vel_out = range_out;
 az_out = range_out;
 aoa_out = range_out;
 snr_out = range_out;
-snr_calc = zeros(length(bearings), 1);
+snr_calc = zeros(length(vels), 1);
 
-for n = 1:length(bearings)
+for n = 1:length(vels)
     
     for m = 1:iterations
         %% Initialize Scenario Object
@@ -53,8 +53,10 @@ for n = 1:length(bearings)
         %% Modify Test Parameters
         
         % Test parameters input here
-        scenario.target_list.pos = range_in * [cosd(bearings(n)); sind(bearings(n)); 0];
-        scenario.sim.target_plat.InitialPosition = range_in * [cosd(bearings(n)); sind(bearings(n)); 0];
+        scenario.target_list.pos = range_in * [1; 0; 0];
+        scenario.sim.target_plat.InitialPosition = range_in * [1; 0; 0];
+        scenario.target_list.vel = vels(n) * [1; 0; 0];
+        scenario.sim.target_plat.Velocity = vels(n) * [1; 0; 0];
         
         %% Run Simulation & Signal Processing
         
@@ -68,13 +70,11 @@ for n = 1:length(bearings)
             [~, ind] = min(abs(scenario.detection.detect_list.range - range_in));
             range_out(n, m) = scenario.detection.detect_list.range(ind);
             vel_out(n, m) = scenario.detection.detect_list.vel(ind);
-            az_out(n, m) = scenario.detection.detect_list.az(ind);
             aoa_out(n, m) = scenario.detection.detect_list.aoa(ind);
             snr_out(n, m) = scenario.detection.detect_list.SNR(ind);
         else
             range_out(n, m) = nan;
             vel_out(n, m) = nan;
-            az_out(n, m) = nan;
             aoa_out(n, m) = nan;
             snr_out(n, m) = nan;
         end
@@ -90,42 +90,15 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
+<<<<<<< Updated upstream
 save('MAT Files/Data/AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
+=======
+save('MAT Files/Data/Vel_vs_AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
+>>>>>>> Stashed changes
 
 % Mean and variance
-range_mean = mean(range_out, 2, 'omitnan');
-range_var = var(range_out, [], 2, 'omitnan');
-range_error = range_mean - range_in;
-
-vel_var = var(vel_out, [], 2, 'omitnan');
-vel_error = mean(vel_out, 2, 'omitnan');
-
-az_mean = mean(az_out, 2, 'omitnan');
-az_var = var(az_out, [], 2, 'omitnan');
-az_error = az_mean - bearings';
-
 aoa_mean = mean(aoa_out, 2, 'omitnan');
 aoa_var = var(aoa_out, [], 2, 'omitnan');
-aoa_error = aoa_mean - bearings';
-
-% Plot results
-figure;
-plot(range_error);
-hold on;
-plot(range_var);
-grid on;
-
-figure;
-plot(vel_error);
-hold on;
-plot(vel_var);
-grid on;
-
-figure;
-plot(az_error);
-hold on;
-plot(az_var);
-grid on;
 
 
 %% Save and Package Resultant Data

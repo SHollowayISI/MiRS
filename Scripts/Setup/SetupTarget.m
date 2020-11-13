@@ -19,14 +19,14 @@ tgt_pos = [ 250; ...
             0];
 
 % Target velocities in meters per second
-tgt_vel = [ 0; ...
+tgt_vel = [ -0.25; ...
             0; ...
             0];
 
 %% Set Target RCS
 
 % Target RCS in dBm^2
-tgt_rcs_dbmm = 23;
+tgt_rcs_dbmm = [23];
 
 % Convert to absolute
 tgt_rcs = db2pow(tgt_rcs_dbmm);

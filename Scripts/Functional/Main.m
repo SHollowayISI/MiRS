@@ -32,10 +32,6 @@ for loop = 1:scenario.simsetup.num_frames
         % Perform signal processing on received signal
         scenario.cube = SignalProcessing(scenario);
         
-        % Generate 3-D Cartesian Mesh Grids
-        %TODO: CHANGE THIS TO 3-COORDINATE SYSTEM
-%         generateCoordinates(scenario);
-        
         %% Single CPI Data Processing
         
         % Perform single-frame radar detection
@@ -57,8 +53,6 @@ for loop = 1:scenario.simsetup.num_frames
     
     %% Multiple CPI Data Processing
     
-    %TODO: UPDATE ALL
-    %
     % Perform binary integration and coordinate determination
     scenario.detection = DetectionMultiple(scenario);
     
@@ -72,39 +66,10 @@ for loop = 1:scenario.simsetup.num_frames
     
     % Update multi-target tracking system
 %     scenario.multi = Tracking(scenario);
-    %}
-    
-    %% Single Slice Visualization
-    
-    %{
-    % View Range-Doppler heat map of center azimuth-elevation direction
-    % viewRDCube(scenario, 'heatmap')
-    
-    % View Range-Doppler surface of center azimuth-elevation direction
-    % viewRDCube(scenario, 'surface')
-    
-    % View Range-Angle heat map of zero-doppler slice
-    % viewRACube(scenario, 'heatmap')
-    
-    % View Range-Angle surface of zero-doppler slice
-    % viewRACube(scenario, 'surface')
-    
-    % View Range-Angle PPI of zero-doppler slice
-    % viewRACube(scenario, 'PPI')
-    
-    % View single-frame detection heatmap
-    % viewDetections(scenario, 'heatmap')
-    
-    % View single-frame detection PPI
-    % viewDetections(scenario, 'PPI')
-    %}
     
 end
 
-%% Data Visualization
-
-% Display detections in 3D scatter plot
-% viewDetections3D(scenario);
+%% Multi Frame Data Visualization
 
 % Display result visualization plots
 % viewTracking(scenario);
