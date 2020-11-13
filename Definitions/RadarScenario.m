@@ -142,8 +142,7 @@ classdef RadarScenario < handle
                         RadarScenario.detection.detect_list.SNR(n));
                 end
             else
-                disp('\nNo Targets Detected\n');
-                disp('');
+                fprintf('\nNo Targets Detected\n\n');
             end
             
             if length(RadarScenario.target_list.rcs) == 1

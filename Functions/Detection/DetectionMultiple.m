@@ -8,6 +8,7 @@ function [detection] = DetectionMultiple(scenario)
 detection = scenario.detection;
 radarsetup = scenario.radarsetup;
 cube = scenario.cube;
+sim = scenario.sim;
 
 %% Perform Binary Integration
 
@@ -28,6 +29,7 @@ regions = regionprops(cc, avg_cube, 'WeightedCentroid');
 detection.detect_list.range = [];
 detection.detect_list.vel = [];
 detection.detect_list.az = [];
+detection.detect_list.aoa = [];
 detection.detect_list.cart = [];
 detection.detect_list.SNR = [];
 detection.detect_list.num_detect = length(regions);
@@ -50,9 +52,54 @@ for n = 1:length(regions)
     % Store SNR
     detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube(cc.PixelIdxList{n}), [], 'all')) ...
         - detection.noise_pow;
+    
+    % Determine range-doppler indices of detections
+    
+    
+    % Find angle of attack using AoA estimator
+    ant_slice = squeeze(scenario.cube.rd_cube(round(ind(2)), round(ind(1)), :))';
+    [~, detection.detect_list.aoa(end+1)] = sim.AoA(ant_slice);
+    
+    % Search through previous detections for targets within group radius
+    if radarsetup.rm_group
+        
+        for m = 1:(length(detection.detect_list.range)-1)
+            
+            if m > (length(detection.detect_list.range)-1)
+                break;
+            end
+            
+            % Check distance in each dimension
+            dist = abs([detection.detect_list.range(m) - detection.detect_list.range(end), ...
+                detection.detect_list.vel(m) - detection.detect_list.vel(end), ...
+                detection.detect_list.az(m) - detection.detect_list.az(end)]);
+            
+            % If in radius, keep larger SNR of two
+            if all(dist < radarsetup.rm_rad)
+                if detection.detect_list.SNR(m) < detection.detect_list.SNR(end)
+                    detection.detect_list.range(m) = [];
+                    detection.detect_list.vel(m) = [];
+                    detection.detect_list.az(m) = [];
+                    detection.detect_list.aoa(m) = [];
+                    detection.detect_list.cart(:,m) = [];
+                    detection.detect_list.SNR(m) = [];
+                    detection.detect_list.num_detect = detection.detect_list.num_detect - 1;
+                else
+                    detection.detect_list.range(end) = [];
+                    detection.detect_list.vel(end) = [];
+                    detection.detect_list.az(end) = [];
+                    detection.detect_list.aoa(end) = [];
+                    detection.detect_list.cart(:,end) = [];
+                    detection.detect_list.SNR(end) = [];
+                    detection.detect_list.num_detect = detection.detect_list.num_detect - 1;
+                    break;
+                end
+            end
+            
+        end
+    end
+    
 end
-
-
 
 end
 
