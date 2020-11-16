@@ -19,25 +19,41 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-vels = 0.05:0.05:0.2;
-range_in = 250;
-iterations = 10;
+ranges = 50:50:1000;
+vel_in = 0;
+bearing_in = 0;
+
+range_var = 10;
+vel_var = 0.1;
+bearing_var = 10;
+
+iterations = 50;
 
 % Initialize outputs
-range_out = zeros(length(vels), iterations);
+range_out = zeros(length(ranges), iterations);
 vel_out = range_out;
-az_out = range_out;
 aoa_out = range_out;
 snr_out = range_out;
-snr_calc = zeros(length(vels), 1);
+calc_out = range_out;
 
-for n = 1:length(vels)
+for n = 1:length(ranges)
     
     for m = 1:iterations
         %% Initialize Scenario Object
         
         % Initialization
         scenario = RadarScenario;
+        
+        %% Modify Test Parameters
+        
+        % Add uncertainty to measurements
+        current_range = ranges(n) + range_var * (rand(1)-0.5);
+        current_vel = vel_in + vel_var * (rand(1)-0.5);
+        current_bearing = bearing_in + bearing_var * (rand(1)-0.5);
+        
+        % Test parameters input here
+        tgt_pos_in = current_range * [cosd(current_bearing); sind(current_bearing); 0];
+        tgt_vel_in = current_vel * [cosd(current_bearing); sind(current_bearing); 0];
         
         %% Setup Structures for Simulation
         
@@ -50,14 +66,6 @@ for n = 1:length(vels)
         % Set up transceiver and channel parameters
         SetupRadarScenario
         
-        %% Modify Test Parameters
-        
-        % Test parameters input here
-        scenario.target_list.pos = range_in * [1; 0; 0];
-        scenario.sim.target_plat.InitialPosition = range_in * [1; 0; 0];
-        scenario.target_list.vel = vels(n) * [1; 0; 0];
-        scenario.sim.target_plat.Velocity = vels(n) * [1; 0; 0];
-        
         %% Run Simulation & Signal Processing
         
         % Perform main processes of simulation, signal and data processing
@@ -67,38 +75,28 @@ for n = 1:length(vels)
         
         % Output parameters here
         if scenario.detection.detect_list.num_detect > 0
-            [~, ind] = min(abs(scenario.detection.detect_list.range - range_in));
-            range_out(n, m) = scenario.detection.detect_list.range(ind);
-            vel_out(n, m) = scenario.detection.detect_list.vel(ind);
-            aoa_out(n, m) = scenario.detection.detect_list.aoa(ind);
+            [~, ind] = min(abs(scenario.detection.detect_list.range - current_range));
+            range_out(n, m) = scenario.detection.detect_list.range(ind) - current_range;
+            vel_out(n, m) = scenario.detection.detect_list.vel(ind) - current_vel;
+            aoa_out(n, m) = scenario.detection.detect_list.aoa(ind) - current_bearing;
             snr_out(n, m) = scenario.detection.detect_list.SNR(ind);
+            calc_out(n, m) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
         else
             range_out(n, m) = nan;
             vel_out(n, m) = nan;
             aoa_out(n, m) = nan;
             snr_out(n, m) = nan;
+            calc_out(n, m) = nan;
         end
         
-        
     end
-    
-    % Save ideal SNR
-    snr_calc(n) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
-    
+   
 end
 
 %% Test Result Calculation and Visualization
 
 % Save results
-<<<<<<< Updated upstream
-save('MAT Files/Data/AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
-=======
-save('MAT Files/Data/Vel_vs_AoA_Test.mat', 'range_out', 'vel_out', 'az_out', 'aoa_out', 'snr_out', 'snr_calc');
->>>>>>> Stashed changes
-
-% Mean and variance
-aoa_mean = mean(aoa_out, 2, 'omitnan');
-aoa_var = var(aoa_out, [], 2, 'omitnan');
+save('MAT Files/Data/Range_Error_Test_Final.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out');
 
 
 %% Save and Package Resultant Data
