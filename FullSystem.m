@@ -8,8 +8,6 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-        - SignalProcessing:
-            + Estimate angle error per velocity
         - Tracking:
             + Implement
 
