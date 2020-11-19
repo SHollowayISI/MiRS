@@ -31,15 +31,16 @@ base_sig = sim.waveform();
 % Transmit the pulse
 tx_sig = sim.transmitter(base_sig);
 
-for block = 1:radarsetup.n_p
+% NOTE: THE FOLLOWING TWO SETTINGS HAVE BEEN REMOVED FROM PARFOR FOR STATIC TARGET
+% Update target position and velocities (
+[target_list.pos, target_list.vel] = sim.target_plat(radarsetup.t_ch);
+
+% Get range and angle to all targets
+[~, tgt_ang] = rangeangle(target_list.pos, simsetup.radar_pos);
+
+parfor block = 1:radarsetup.n_p
     
     for chirp = 1:radarsetup.n_tx
-        
-        % Update target position and velocities
-        [target_list.pos, target_list.vel] = sim.target_plat(radarsetup.t_ch);
-        
-        % Get range and angle to all targets
-        [~, tgt_ang] = rangeangle(target_list.pos, simsetup.radar_pos);
         
         % Set up weights to implement TDM-MIMO
         weights = [0; 0];
@@ -75,9 +76,15 @@ for block = 1:radarsetup.n_p
         ch_ind = (1:radarsetup.n_rx) + radarsetup.n_rx * (chirp - 1);
         
         % Save Rx signal by fast time x slow time x virtual antenna
-        rx_sig(:,block,ch_ind) = decim_sig((radarsetup.drop_s+1):end,:,:);
+        par_rx_sig{block}(:,1,ch_ind) = decim_sig((radarsetup.drop_s+1):end,:,:);
         
     end
+    
+end
+
+for block = 1:radarsetup.n_p
+    
+    rx_sig(:,block,:) = par_rx_sig{block};
     
 end
 

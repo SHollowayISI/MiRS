@@ -88,14 +88,8 @@ end
 
 %% Derive Axes
 
-% NOTE: Error of unknown source causing range resolution error with
-% coefficient equal to the approximation error (3e8 / 2.99792458e8)
-
 % Derive Range axis
 cube.range_res = ((size(scenario.rx_sig,1) + radarsetup.drop_s)/N_r)*(c/(2*radarsetup.bw));
-
-% Adjust for error
-cube.range_res = cube.range_res * (3e8 / c);
 cube.range_axis = ((1:(N_r/2))-1)*cube.range_res;
 
 % Derive Doppler axis

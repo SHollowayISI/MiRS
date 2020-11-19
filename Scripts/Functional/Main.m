@@ -25,7 +25,12 @@ for loop = 1:scenario.simsetup.num_frames
         %% Radar Simulation
         
         % Run simulation to retrieve fast time x slow time x rx-channel signal
-        scenario = RadarSimulation(scenario);
+        if scenario.simsetup.par_sim
+            scenario = RadarSimulation_Parallel_StaticTarget(scenario);
+%             scenario = RadarSimulation_Parallel(scenario);
+        else
+            scenario = RadarSimulation(scenario);
+        end
         
         %% Signal Processing
         

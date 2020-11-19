@@ -8,8 +8,9 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-        - SignalProcessing:
-            + Estimate angle error per velocity
+        - General:
+            + Programatically switch between test and sim mode in
+            SetupTarget
         - Tracking:
             + Implement
 
@@ -53,7 +54,6 @@ Main
 
 % Run all end-of-process tasks
 EndProcess
-
 
 
 
