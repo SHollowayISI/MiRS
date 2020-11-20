@@ -61,9 +61,13 @@ end
 
 
 % Apply elevation windowing
-expression = '(size(cube.rd_cube,3)), [2 3 1]).*cube.rd_cube;';
-expression = ['permute(', radarsetup.az_win, expression];
-cube.angle_cube = eval(expression);
+if strcmp(radarsetup.az_win, 'none')
+    cube.angle_cube = cube.rd_cube;
+else
+    expression = '(size(cube.rd_cube,3)), [2 3 1]).*cube.rd_cube;';
+    expression = ['permute(', radarsetup.az_win, expression];
+    cube.angle_cube = eval(expression);
+end
 
 % Clear MIMO cube
 if simsetup.clear_cube

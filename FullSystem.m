@@ -11,6 +11,7 @@
         - General:
             + Programatically switch between test and sim mode in
             SetupTarget
+            + Determine Pfa settings
         - Tracking:
             + Implement
 

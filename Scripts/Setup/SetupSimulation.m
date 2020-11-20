@@ -50,5 +50,9 @@ if (scenario.simsetup.par_cfar || scenario.simsetup.par_test)
     end
 end
 
+%% Test Mode Flag
+
+test_mode = false;
+
 
 

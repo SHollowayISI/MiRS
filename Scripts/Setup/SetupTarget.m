@@ -14,16 +14,20 @@
 %% Target Setup
 
 % Target positions in meters
-% tgt_pos = [ 50; ...
-%             0; ...
-%             0];
-tgt_pos = tgt_pos_in;
+tgt_pos = [500; ...
+            0; ...
+            0];
+if test_mode
+    tgt_pos = tgt_pos_in;
+end
 
 % Target velocities in meters per second
-% tgt_vel = [ 0; ...
-%             0; ...
-%             0];
-tgt_vel = tgt_vel_in;
+tgt_vel = [ 0; ...
+            0; ...
+            0];     
+if test_mode
+    tgt_vel = tgt_vel_in;
+end
 
 %% Set Target RCS
 

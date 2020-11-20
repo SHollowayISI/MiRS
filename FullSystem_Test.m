@@ -19,13 +19,14 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-ranges = 50:50:1000;
+% ranges = 50:50:1000;
+ranges = [1000];
 vel_in = 0;
 bearing_in = 0;
 
-range_var = 1;
+range_var = 0;
 vel_var = 0;
-bearing_var = 1;
+bearing_var = 0;
 
 iterations = 20;
 
@@ -35,6 +36,7 @@ vel_out = range_out;
 aoa_out = range_out;
 snr_out = range_out;
 calc_out = range_out;
+num_det_out = range_out;
 
 for n = 1:length(ranges)
     
@@ -64,6 +66,9 @@ for n = 1:length(ranges)
         % Set up simulation parameters
         SetupSimulation
         
+        % Override regular operation
+        test_mode = true;
+        
         % Set up radar target
         SetupTarget
         
@@ -85,12 +90,14 @@ for n = 1:length(ranges)
             aoa_out(n, m) = scenario.detection.detect_list.aoa(ind) - current_bearing;
             snr_out(n, m) = scenario.detection.detect_list.SNR(ind);
             calc_out(n, m) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
+            num_det_out(n,m) = scenario.detect.detect_listion.num_detect;
         else
             range_out(n, m) = nan;
             vel_out(n, m) = nan;
             aoa_out(n, m) = nan;
             snr_out(n, m) = nan;
-            calc_out(n, m) = nan;
+            calc_out(n, m) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
+            num_det_out(n,m) = scenario.detection.detect_list.num_detect;
         end
         
     end
@@ -100,7 +107,7 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
-save('MAT Files/Data/HighSampleRateFullTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out');
+save('MAT Files/Data/LongRangeTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
 
 
 %% Save and Package Resultant Data

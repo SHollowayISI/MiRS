@@ -40,16 +40,16 @@ scenario.radarsetup = struct( ...
     ... % Processing Properties
     'r_win',        'hanning', ...          % Window for range processing
     'd_win',        'hanning', ...          % Window for doppler processing
-    'az_win',       'hanning', ...          % Window for azimuth processing
+    'az_win',       'none', ...          % Window for azimuth processing
     'n_az',         16, ...                 % Size of azimuth FFT
     'v_az_coeff',   -18.1246, ...           % Velocity-Bearing coupling in degree per meter per second
     ...
     ... % Detection Properties
     'detect_type',  'CFAR', ...             % Choose 'CFAR' or 'threshold'
     'thresh',       [], ...                 % Threshold in dB for threshold detection
-    'CFAR_Pfa',     10^-6, ...              % CFAR false alarm probability
+    'CFAR_Pfa',     3e-5, ...             % CFAR false alarm probability
     'num_guard',    [3 1], ...              % Number of R-D guard cells for CFAR detection
-    'num_train',    [3 1], ...              % Number of R-D training cells for CFAR detection
+    'num_train',    [15 2], ...              % Number of R-D training cells for CFAR detection
     'rm_group',     false, ...              % T/F remove closely grouped targets
     'rm_rad',       [5 Inf 5], ...          % Group radius in [m], [m/s], [deg]
     'dilate',       false, ...              % T/F dilate raw CFAR result to avoid duplicates 

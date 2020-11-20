@@ -46,6 +46,8 @@ for n = 1:length(regions)
     % Store SNR
     detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube(cc.PixelIdxList{n}), [], 'all')) ...
         - detection.noise_pow;    
+%     detection.detect_list.SNR(end+1) = 10*log10(sum(avg_cube(cc.PixelIdxList{n}), 'all')) ...
+%         - detection.noise_pow;
     
     % Find angle of attack using AoA estimator
     ant_slice = squeeze(scenario.cube.rd_cube(round(ind(2)), round(ind(1)), :))';
