@@ -19,14 +19,14 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-% ranges = 50:50:1000;
-ranges = [1000];
+ranges = 50:50:1000;
+% ranges = [1000];
 vel_in = 0;
 bearing_in = 0;
 
-range_var = 0;
+range_var = 1;
 vel_var = 0;
-bearing_var = 0;
+bearing_var = 1;
 
 iterations = 20;
 
@@ -90,7 +90,7 @@ for n = 1:length(ranges)
             aoa_out(n, m) = scenario.detection.detect_list.aoa(ind) - current_bearing;
             snr_out(n, m) = scenario.detection.detect_list.SNR(ind);
             calc_out(n, m) = CalculateSNR(scenario, scenario.target_list.rcs, sqrt(sum(scenario.target_list.pos.^2)));
-            num_det_out(n,m) = scenario.detect.detect_listion.num_detect;
+            num_det_out(n,m) = scenario.detection.detect_list.num_detect;
         else
             range_out(n, m) = nan;
             vel_out(n, m) = nan;
@@ -107,7 +107,7 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
-save('MAT Files/Data/LongRangeTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
+save('MAT Files/Data/NewTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
 
 
 %% Save and Package Resultant Data

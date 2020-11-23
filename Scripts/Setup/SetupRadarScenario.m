@@ -47,7 +47,7 @@ scenario.radarsetup = struct( ...
     ... % Detection Properties
     'detect_type',  'CFAR', ...             % Choose 'CFAR' or 'threshold'
     'thresh',       [], ...                 % Threshold in dB for threshold detection
-    'CFAR_Pfa',     3e-5, ...             % CFAR false alarm probability
+    'CFAR_Pfa',     1e-6, ...             % CFAR false alarm probability
     'num_guard',    [3 1], ...              % Number of R-D guard cells for CFAR detection
     'num_train',    [15 2], ...              % Number of R-D training cells for CFAR detection
     'rm_group',     false, ...              % T/F remove closely grouped targets
