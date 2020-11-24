@@ -19,31 +19,29 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-ranges = 50:50:1000;
-% ranges = [1000];
+bearings = 0:5:90;
+range_in = 250;
 vel_in = 0;
-bearing_in = 0;
-
 range_var = 1;
 vel_var = 0;
-bearing_var = 1;
+bearing_var = 0;
 
 iterations = 20;
 
 % Initialize outputs
-range_out = zeros(length(ranges), iterations);
+range_out = zeros(length(bearings), iterations);
 vel_out = range_out;
 aoa_out = range_out;
 snr_out = range_out;
 calc_out = range_out;
 num_det_out = range_out;
 
-for n = 1:length(ranges)
+for n = 1:length(bearings)
     
     for m = 1:iterations
         
         % Read out current progress
-        fprintf('Range: %d\nIteration: %d\n', ranges(n), m);
+        fprintf('Bearing: %d\nIteration: %d\n', bearings(n), m);
         
         %% Initialize Scenario Object
         
@@ -53,9 +51,9 @@ for n = 1:length(ranges)
         %% Modify Test Parameters
         
         % Add uncertainty to measurements
-        current_range = ranges(n) + range_var * 2 *(rand(1)-0.5);
+        current_range = range_in + range_var * 2 *(rand(1)-0.5);
         current_vel = vel_in + vel_var * 2 * (rand(1)-0.5);
-        current_bearing = bearing_in + bearing_var * 2 * (rand(1)-0.5);
+        current_bearing = bearings(n) + bearing_var * 2 * (rand(1)-0.5);
         
         % Test parameters input here
         tgt_pos_in = current_range * [cosd(current_bearing); sind(current_bearing); 0];
@@ -107,7 +105,7 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
-save('MAT Files/Data/NewTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
+save('MAT Files/Data/BearingTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
 
 
 %% Save and Package Resultant Data
