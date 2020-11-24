@@ -8,10 +8,6 @@
     This shell file runs successive scripts and gauges progress.
 
     TODO:
-        - General:
-            + Programatically switch between test and sim mode in
-            SetupTarget
-            + Determine Pfa settings
         - Tracking:
             + Implement
 
