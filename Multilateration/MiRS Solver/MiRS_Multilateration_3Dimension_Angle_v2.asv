@@ -9,7 +9,7 @@ close all;
 % Simulation variables
 num_nodes = 10;
 field_size_xy = 1000;
-field_size_z = 10;
+field_size_z = 5;
 offset_z = 0;
 error_var_r = 0.0025;
 error_var_a = 0.2;
@@ -158,7 +158,6 @@ k = [-b, a, 0];
 k = k ./ norm(k);
 K = [0, 0, k(2); 0, 0, -k(1); -k(2), k(1), 0];
 R = eye(3) + sind(theta)*K + (1-cosd(theta))*K*K;
-x_rotated = zeros(size(x_result));
 x_rotated(1,:) = x_result(1,:);
 x_rotated(2:end,:) = transpose(R * x_result(2:end,:)');
 
@@ -171,10 +170,7 @@ x_rotated = transpose(R_z * x_rotated');
 error_list = x_rotated(2:end,:) - x_exact(2:end,:);
 err_off = sqrt(sum(mean(error_list,1).^2));
 err_rms = rms(sqrt(sum((error_list - mean(error_list,1)).^2, 2)));
-err_xy_off = sqrt(sum(mean(error_list(:,1:2),1).^2));
-err_xy_rms = rms(sqrt(sum((error_list(:,1:2) - mean(error_list(:,1:2),1)).^2, 2)));
-err_z_off = mean(error_list(:,3),1);
-err_z_rms = rms(error_list(:,3) - mean(error_list(:,3),1));
+err_xy_off = sqrt(sum(mean(error_list(:,1:2)
 
 fprintf('\nSimulation Complete.\n');
 fprintf('Angle Error: (%0.3f x %0.3f) [deg]\n', theta, phi);
