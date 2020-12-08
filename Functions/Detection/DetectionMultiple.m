@@ -45,13 +45,17 @@ for n = 1:length(regions)
     
     % Store SNR
     detection.detect_list.SNR(end+1) = 10*log10(max(avg_cube(cc.PixelIdxList{n}), [], 'all')) ...
-        - detection.noise_pow;    
-%     detection.detect_list.SNR(end+1) = 10*log10(sum(avg_cube(cc.PixelIdxList{n}), 'all')) ...
-%         - detection.noise_pow;
+        - detection.noise_pow;
     
     % Find angle of attack using AoA estimator
-    ant_slice = squeeze(scenario.cube.rd_cube(round(ind(2)), round(ind(1)), :))';
-    [~, ang] = sim.AoA(ant_slice);
+    ant_slice = squeeze(cube.rd_cube(round(ind(2)), round(ind(1)), :))';
+    ang_list = zeros(radarsetup.n_tx,1);
+    for tx_num = 1:radarsetup.n_tx
+        ind = (tx_num-1)*radarsetup.n_rx + (1:radarsetup.n_rx);
+        [~, ang_list(tx_num)] = sim.AoAReal(ant_slice(ind));
+    end
+    ang = -1 * mean(ang_list);
+%     [~, ang] = sim.AoA(ant_slice_corrected);
     
     % Correct velocity-bearing coupling due to TDM-MIMO
     detection.detect_list.aoa(end+1) = ang - radarsetup.v_az_coeff * detection.detect_list.vel(end);

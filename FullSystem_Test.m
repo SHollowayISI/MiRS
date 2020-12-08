@@ -19,7 +19,7 @@ StartProcess;
 %% Loop Through Test Parameters
 
 % Test parameters described here
-bearings = 0:5:90;
+bearings = 30;
 range_in = 250;
 vel_in = 0;
 range_var = 1;
@@ -105,7 +105,7 @@ end
 %% Test Result Calculation and Visualization
 
 % Save results
-save('MAT Files/Data/BearingTest.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
+save('MAT Files/Data/BearingTestFixedMIMO.mat', 'range_out', 'vel_out', 'aoa_out', 'snr_out', 'calc_out', 'num_det_out');
 
 
 %% Save and Package Resultant Data

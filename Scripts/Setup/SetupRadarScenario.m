@@ -50,8 +50,8 @@ scenario.radarsetup = struct( ...
     'CFAR_Pfa',     1e-6, ...             % CFAR false alarm probability
     'num_guard',    [3 1], ...              % Number of R-D guard cells for CFAR detection
     'num_train',    [15 2], ...              % Number of R-D training cells for CFAR detection
-    'rm_group',     false, ...              % T/F remove closely grouped targets
-    'rm_rad',       [5 Inf 5], ...          % Group radius in [m], [m/s], [deg]
+    'rm_group',     true, ...              % T/F remove closely grouped targets
+    'rm_rad',       [1 Inf 5], ...          % Group radius in [m], [m/s], [deg]
     'dilate',       false, ...              % T/F dilate raw CFAR result to avoid duplicates 
     'dilate_shape', 'line', ...             % Shape to dilate raw CFAR results
     'dilate_args',  '3, 90', ...            % Arguments in strel function for dilation
