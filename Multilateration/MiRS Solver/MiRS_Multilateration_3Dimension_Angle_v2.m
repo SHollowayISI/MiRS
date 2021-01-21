@@ -19,8 +19,8 @@ num_iter = 1000;
 r_factor = 1e16;
 a_factor = 1e-4;
 m_factor = 1e16;
-c_factor = 1e12;
-z_factor = 1e12;
+c_factor = 1e4;
+z_factor = 1e0;
 r_weight = r_factor/(error_var_r)^4;
 a_weight = a_factor/(error_var_a)^2;
 z_weight = z_factor/(field_size_z)^2;
@@ -89,7 +89,7 @@ m_weight(m == 1) = m_factor;
 % W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1)]);
 % W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; c_weight]);
 W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1); c_weight]);
-J = jacobian(x_guess{1}, n, m, n_ind, m_ind, num_var, num_eq);
+J = jacobian(x_guess{1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z);
 
 % Evaluate cost function
 y_hat = angleRangeFunctions(x_guess{1}, n, m, n_ind, m_ind, offset_z);
@@ -103,7 +103,7 @@ lambda(1) = lambda_init;
 for iter = 2:num_iter
     
     % Get Jacobian matrix
-    J = jacobian(x_guess{iter-1}, n, m, n_ind, m_ind, num_var, num_eq);
+    J = jacobian(x_guess{iter-1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z);
     
     % Levenberg-Marquadt Step
     h = LMStep(y_hat, y, W, J, lambda(iter-1));
@@ -153,18 +153,18 @@ D = (x'*x)*(y'*y) - (x'*y)*(x'*y);
 a = ((y'*z)*(x'*y) - (x'*z)*(y'*y))/D;
 b = ((x'*y)*(x'*z) - (x'*x)*(y'*z))/D;
 n = [a, b, 1];
-theta = -acosd(1/sqrt(sum(n.^2)));
+theta = acosd(1/sqrt(sum(n.^2)));
 k = [-b, a, 0];
 k = k ./ norm(k);
 K = [0, 0, k(2); 0, 0, -k(1); -k(2), k(1), 0];
-R = eye(3) + sind(theta)*K + (1-cosd(theta))*K*K;
+R = eye(3) + sind(-theta)*K + (1-cosd(-theta))*K*K;
 x_rotated = zeros(size(x_result));
 x_rotated(1,:) = x_result(1,:);
 x_rotated(2:end,:) = transpose(R * x_result(2:end,:)');
 
 % Perform rotation
-phi = -mean(atan2d(x_rotated(2:end,2), x_rotated(2:end,1)) - atan2d(x_exact(2:end,2), x_exact(2:end,1)));
-R_z = [cosd(phi), -sind(phi), 0; sind(phi), cosd(phi), 0; 0, 0, 1];
+phi = mean(atan2d(x_rotated(2:end,2), x_rotated(2:end,1)) - atan2d(x_exact(2:end,2), x_exact(2:end,1)));
+R_z = [cosd(-phi), -sind(-phi), 0; sind(-phi), cosd(-phi), 0; 0, 0, 1];
 x_rotated = transpose(R_z * x_rotated');
 
 % Calculate error
@@ -243,13 +243,13 @@ y_hat = [r_sq_est; ang_est; z_est; c_est];
 end
 
 %% Jacobian
-function J = jacobian(x_in, n, m, n_ind, m_ind, num_var, num_eq)
+function J = jacobian(x_in, n, m, n_ind, m_ind, num_var, num_eq, offset_z)
 
 % Calculate squared range between points
 r_sq_est = zeros(length(n),1);
 for i = 1:length(n)
     if (m(i) == 1)
-        r_sq_est(i) = sum(x_in(n_ind(i,:)).^2);
+        r_sq_est(i) = sum(x_in(n_ind(i,1:2)).^2) + (x_in(n_ind(i,3)) - offset_z).^2;
     else
         r_sq_est(i) = sum((x_in(n_ind(i,:)) - x_in(m_ind(i,:))).^2);
     end

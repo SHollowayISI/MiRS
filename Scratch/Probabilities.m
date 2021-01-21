@@ -14,14 +14,26 @@ N = n_r * 64 * 8;
 % [P_d_mn, P_d, P_fa, P_fa_mn] = Pd_from_Pk(P_k, k, SNR_min, N, 2, 5);
 
 % P_k from Pd
-P_k = 0.01:0.01:0.25;
-for b = 1:length(P_k)
-    [Pd_mn_out(b), Pd_out(b), Pfa_out(b), Pfa_mn_out(b)] = Pd_from_Pk(P_k(b), k, SNR_min, N, 2, 5);
-end
+% P_k = 0.01:0.01:0.25;
+% for b = 1:length(P_k)
+%     [Pd_mn_out(b), Pd_out(b), Pfa_out(b), Pfa_mn_out(b)] = Pd_from_Pk(P_k(b), k, SNR_min, N, 2, 5);
+% end
+% 
+% [P_k', Pd_mn_out', Pd_out', Pfa_out', Pfa_mn_out']
 
-[P_k', Pd_mn_out', Pd_out', Pfa_out', Pfa_mn_out']
+p_fa_in = 2e-5;
+p_fa_mn = Pfa_Binary(p_fa_in, 2, 5)
+p_k_out = Pk_from_Pfa(p_fa_mn, 1, N)
+p_d = Pd_from_Pfa(p_fa_in, 9.7615);
+% p_d = Pd_from_Pfa(p_fa_in, 8.4371);
+p_d_mn = Pd_Binary(p_d, 2, 5)
 
 %% User defined functions
+
+function P_k = Pk_from_Pfa(P_fa_mn, k, num_sample)
+    z = (k - num_sample * P_fa_mn) / sqrt(num_sample * P_fa_mn * (1 - P_fa_mn));
+    P_k = 1 - 0.5*(1 + erf(z / sqrt(2)));
+end
 
 function [z] = invprob(p)
     z = sqrt(2) * erfinv(2*p - 1);
