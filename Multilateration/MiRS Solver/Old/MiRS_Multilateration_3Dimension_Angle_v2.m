@@ -9,8 +9,8 @@ close all;
 % Simulation variables
 num_nodes = 10;
 field_size_xy = 1600;
-field_size_z = 100;
-offset_z = 100;
+field_size_z = 10;
+offset_z = 50;
 error_var_r = 0.0025;
 error_var_a = 0.2;
 
@@ -76,20 +76,20 @@ z_s = guess_z;
 c_s = 0;
 
 % Vectorize data
-% y = [r_sq; ang];
+y = [r_sq; ang];
 % y = [r_sq; ang; z_s];
 % y = [r_sq; ang; c_s];
-y = [r_sq; ang; z_s; c_s];
+% y = [r_sq; ang; z_s; c_s];
 
 %% Initial step
 
 % Matrix setup
 m_weight = ones(num_eq, 1);
 m_weight(m == 1) = m_factor;
-% W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight]);
+W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight]);
 % W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1)]);
 % W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; c_weight]);
-W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1); c_weight]);
+% W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1); c_weight]);
 J = jacobian(x_guess{1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z);
 
 % Evaluate cost function
@@ -131,7 +131,7 @@ for iter = 2:num_iter
     
     % Break if cost difference is low
     cost_diff = log10(abs(cost(iter) - cost(iter-1)));
-    if ((cost_diff < cost_diff_thresh) && (cost(iter) < cost_thresh))
+    if ((cost_diff < cost_diff_thresh) && (abs(cost(iter)) < cost_thresh))
         disp('Loop broken.');
         fprintf('Iterations: %d\nCost: %d\n', iter, cost(iter));
         break;
@@ -147,39 +147,16 @@ x_exact = reshape(x_real, 3, num_nodes)';
 
 % Kabsch algorithm for rotation
 [U, r, lrms] = Kabsch(x_result', x_exact');
+x_rotated = (U * x_result' + r)';
 
-% Updated rotation method
-% com = mean(x_result(2:end,:), 1);
-% x = x_result(2:end,1) - com(1);
-% y = x_result(2:end,2) - com(2);
-% z = x_result(2:end,3) - com(3);
-% D = (x'*x)*(y'*y) - (x'*y)*(x'*y);
-% a = ((y'*z)*(x'*y) - (x'*z)*(y'*y))/D;
-% b = ((x'*y)*(x'*z) - (x'*x)*(y'*z))/D;
-% n = [a, b, 1];
-% theta = acosd(1/sqrt(sum(n.^2)));
-% k = [-b, a, 0];
-% k = k ./ norm(k);
-% K = [0, 0, k(2); 0, 0, -k(1); -k(2), k(1), 0];
-% R = eye(3) + sind(-theta)*K + (1-cosd(-theta))*K*K;
-% x_rotated = zeros(size(x_result));
-% x_rotated(1,:) = x_result(1,:);
-% x_rotated(2:end,:) = transpose(R * x_result(2:end,:)');
-% 
-% % Perform rotation
-% phi = mean(atan2d(x_rotated(2:end,2), x_rotated(2:end,1)) - atan2d(x_exact(2:end,2), x_exact(2:end,1)));
-% R_z = [cosd(-phi), -sind(-phi), 0; sind(-phi), cosd(-phi), 0; 0, 0, 1];
-% x_rotated = transpose(R_z * x_rotated');
-% 
-% % Perform reflection
-% x_rotated = x_rotated .* [1 1 -1];
-
-x_rotated = (U * x_result')';
-
+% Calculate rotation angles
+theta = -asind(U(3,1));
+psi = atan2d(U(3,2)/cosd(theta), U(3,3)/cosd(theta));
+phi = atan2d(U(2,1)/cosd(theta), U(1,1)/cosd(theta));
 
 % Calculate error
-error_list = x_rotated(2:end,:) - x_exact(2:end,:);
-% error_list = x_rotated - x_exact;
+% error_list = x_rotated(2:end,:) - x_exact(2:end,:);
+error_list = x_rotated - x_exact;
 err_off = sqrt(sum(mean(error_list,1).^2));
 err_rms = rms(sqrt(sum((error_list - mean(error_list,1)).^2, 2)));
 err_xy_off = sqrt(sum(mean(error_list(:,1:2),1).^2));
@@ -188,7 +165,7 @@ err_z_off = mean(error_list(:,3),1);
 err_z_rms = rms(error_list(:,3) - mean(error_list(:,3),1));
 
 fprintf('\nSimulation Complete.\n');
-% fprintf('Angle Error: (%0.3f x %0.3f) [deg]\n', theta, phi);
+fprintf('Angle Error: (%0.3f x %0.3f x %0.3f) [deg]\n', theta, phi, psi);
 fprintf('\nTotal Distance: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_off, err_rms);
 fprintf('\nXY-Plane: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_xy_off, err_xy_rms);
 fprintf('\nAltitude: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_z_off, err_z_rms);
@@ -207,12 +184,12 @@ scatter3(x_rotated(:,1), x_rotated(:,2), x_rotated(:,3), '.', 'b');
 % hold on;
 % scatter3(x_rotated_2(:,1), x_rotated_2(:,2), x_rotated_2(:,3), 'g');
 grid on;
-xlim([-1 1] * field_size_xy)
+xlim([-1 1] * field_size_xy/2)
 xlabel('x')
-ylim([-1 1] * field_size_xy)
+ylim([-1 1] * field_size_xy/2)
 ylabel('y')
 % zlim([-field_size_z field_size_z + offset_z])
-zlim([-1 1] * field_size_z)
+zlim([-1 1] * field_size_xy/2)
 
 %% Cost function
 function y_hat = angleRangeFunctions(x_in, n, m, n_ind, m_ind, offset_z)
@@ -238,18 +215,18 @@ for i = 1:length(n)
 end
 
 % % Cost function for altitude
-z_est = zeros(length(x_in)/3, 1);
-for i = 1:(length(x_in)/3)
-    z_est(i) = x_in(3*i);
-end
+% z_est = zeros(length(x_in)/3, 1);
+% for i = 1:(length(x_in)/3)
+%     z_est(i) = x_in(3*i);
+% end
 
 % Cost function for z-center
-c_est = (sum(x_in(mod(1:length(x_in),3) == 0)) / (length(x_in)/3)).^2;
+% c_est = (sum(x_in(mod(1:length(x_in),3) == 0)) / (length(x_in)/3)).^2;
 
-% y_hat = [r_sq_est; ang_est];
+y_hat = [r_sq_est; ang_est];
 % y_hat = [r_sq_est; ang_est; z_est];
 % y_hat = [r_sq_est; ang_est; c_est];
-y_hat = [r_sq_est; ang_est; z_est; c_est];
+% y_hat = [r_sq_est; ang_est; z_est; c_est];
 
 end
 
@@ -267,10 +244,10 @@ for i = 1:length(n)
 end
 
 % Calculate jacobian
-% J = zeros(2*num_eq, num_var);
+J = zeros(2*num_eq, num_var);
 % J = zeros(2*num_eq + (num_var/3), num_var);
 % J = zeros(2*num_eq + 1, num_var);
-J = zeros(2*num_eq + (num_var/3) + 1, num_var);
+% J = zeros(2*num_eq + (num_var/3) + 1, num_var);
 for row = 1:num_eq
     if m(row) == 1
         J(row, n_ind(row, 1:2)) = 2 * (x_in(n_ind(row,1:2)));
@@ -289,14 +266,14 @@ end
 J((num_eq+1):(2*num_eq),:) = rad2deg(J((num_eq+1):(2*num_eq),:) ./ r_sq_est);
 
 % Z constraint
-for row = 1:(num_var/3)
-    J(row + 2*num_eq, 3*row) = 1;
-end
+% for row = 1:(num_var/3)
+%     J(row + 2*num_eq, 3*row) = 1;
+% end
 
 % Z-center constraint
-for row = 1:(num_var/3)
-    J(end, 3*row) = 2 * sum(x_in(mod(1:num_var, 3) == 0)) / ((num_var/3)^2);
-end
+% for row = 1:(num_var/3)
+%     J(end, 3*row) = 2 * sum(x_in(mod(1:num_var, 3) == 0)) / ((num_var/3)^2);
+% end
 
 end
 

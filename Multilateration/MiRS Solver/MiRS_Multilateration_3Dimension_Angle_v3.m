@@ -1,16 +1,16 @@
 
 %% Bookkeeping
 
-clear variables;
-close all;
+% clear variables;
+% close all;
 
 %% User Inputs
 
 % Simulation variables
 num_nodes = 10;
 field_size_xy = 1600;
-field_size_z = 100;
-offset_z = 0;
+field_size_z = 20;
+offset_z = 100;
 error_var_r = 0.0025;
 error_var_a = 0.2;
 
@@ -18,13 +18,10 @@ error_var_a = 0.2;
 num_iter = 1000;
 r_factor = 1e0;
 a_factor = 1e0;
-m_factor = 1e0;
-c_factor = 0;%1e-10;
-z_factor = 0;%1e-10;
+z_factor = 1e0;
 r_weight = r_factor/(error_var_r)^4;
 a_weight = a_factor/(error_var_a)^2;
-z_weight = z_factor/(field_size_z)^2;
-c_weight = c_factor * 12/((num_nodes - 1)*(field_size_z^2));
+z_weight = min(1e20, z_factor/(field_size_z)^2);
 cost_thresh = 0;
 cost_diff_thresh = -Inf;
 lambda_init = 0.01;
@@ -51,7 +48,6 @@ m = (1:num_eq)' - (n - 2) .* (n - 1)/2;
 x_real = field_size_xy * (rand(num_var, 1) - 0.5);
 x_real(mod(1:length(x_real), 3) == 0) = field_size_z * (rand((num_nodes-1),1) - 0.5);
 x_real = [0; 0; offset_z; x_real];
-% x_real = x_real - repmat([0; 0; offset_z], num_nodes, 1);
 
 % Calculate exact ranges (squared)
 n_ind = 3*floor((n-1)) + (1:3) - 3;
@@ -72,28 +68,18 @@ x_guess{1} = reshape(([guess_x, guess_y, guess_z])', [], 1);
 % Introduce error into range and angle measurement
 r_sq = r_sq + error_var_r*(rand(size(r_sq)) - 0.5);
 ang = ang + error_var_a*(rand(size(ang)) - 0.5);
-z_s = guess_z;
-c_s = 0;
 
 % Vectorize data
-% y = [r_sq; ang];
-% y = [r_sq; ang; z_s];
-% y = [r_sq; ang; c_s];
-y = [r_sq; ang; z_s; c_s];
+y = [r_sq; ang; guess_z];
 
 %% Initial step
 
 % Matrix setup
-m_weight = ones(num_eq, 1);
-m_weight(m == 1) = m_factor;
-% W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight]);
-% W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1)]);
-% W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; c_weight]);
-W = diag([r_weight*ones(num_eq, 1); a_weight*m_weight; z_weight*ones(num_var/3, 1); c_weight]);
-J = jacobian(x_guess{1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z);
+W = diag([r_weight*ones(num_eq, 1); a_weight*ones(num_eq, 1); z_weight*ones(num_nodes-1, 1)]);
+J = jacobian(x_guess{1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z, field_size_z);
 
 % Evaluate cost function
-y_hat = angleRangeFunctions(x_guess{1}, n, m, n_ind, m_ind, offset_z);
+y_hat = angleRangeFunctions(x_guess{1}, n, m, n_ind, m_ind, offset_z, field_size_z);
 cost(1) = costFunction(y_hat, y, W, J, zeros(num_var, 1));
 
 % Initialize lambda parameter
@@ -104,13 +90,12 @@ lambda(1) = lambda_init;
 for iter = 2:num_iter
     
     % Get Jacobian matrix
-    J = jacobian(x_guess{iter-1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z);
+    J = jacobian(x_guess{iter-1}, n, m, n_ind, m_ind, num_var, num_eq, offset_z, field_size_z);
     
     % Levenberg-Marquadt Step
     h = LMStep(y_hat, y, W, J, lambda(iter-1));
     
     % Lambda iteration
-%     eta(iter) = LMMetric(y_hat, y, W, J, h, lambda(iter-1));
     if LMMetric(y_hat, y, W, J, h, lambda(iter-1)) > epsilon
         cost(iter) = costFunction(y_hat, y, W, J, h);
         x_guess{iter} = x_guess{iter-1} + h;
@@ -124,14 +109,14 @@ for iter = 2:num_iter
     % Update guess and cost
     cost(iter) = costFunction(y_hat, y, W, J, h);
     x_guess{iter} = x_guess{iter-1} + h;
-    y_hat = angleRangeFunctions(x_guess{iter}, n, m, n_ind, m_ind, offset_z);
+    y_hat = angleRangeFunctions(x_guess{iter}, n, m, n_ind, m_ind, offset_z, field_size_z);
     
     % Temp: retain lambda
     lambda(iter) = lambda(iter-1);
     
     % Break if cost difference is low
     cost_diff = log10(abs(cost(iter) - cost(iter-1)));
-    if ((cost_diff < cost_diff_thresh) && (cost(iter) < cost_thresh))
+    if ((cost_diff < cost_diff_thresh) && (abs(cost(iter)) < cost_thresh))
         disp('Loop broken.');
         fprintf('Iterations: %d\nCost: %d\n', iter, cost(iter));
         break;
@@ -153,9 +138,9 @@ x_rotated = (U * x_result' + r)';
 theta = -asind(U(3,1));
 psi = atan2d(U(3,2)/cosd(theta), U(3,3)/cosd(theta));
 phi = atan2d(U(2,1)/cosd(theta), U(1,1)/cosd(theta));
+total = acosd((trace(U)-1)/2);
 
 % Calculate error
-% error_list = x_rotated(2:end,:) - x_exact(2:end,:);
 error_list = x_rotated - x_exact;
 err_off = sqrt(sum(mean(error_list,1).^2));
 err_rms = rms(sqrt(sum((error_list - mean(error_list,1)).^2, 2)));
@@ -165,11 +150,10 @@ err_z_off = mean(error_list(:,3),1);
 err_z_rms = rms(error_list(:,3) - mean(error_list(:,3),1));
 
 fprintf('\nSimulation Complete.\n');
-fprintf('Angle Error: (%0.3f x %0.3f x %0.3f) [deg]\n', theta, phi, psi);
+fprintf('Angle Error: (%0.3f x %0.3f x %0.3f = %0.3f) [deg]\n', theta, phi, psi, total);
 fprintf('\nTotal Distance: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_off, err_rms);
 fprintf('\nXY-Plane: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_xy_off, err_xy_rms);
 fprintf('\nAltitude: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_z_off, err_z_rms);
-
 
 % Plotting
 close all;
@@ -192,7 +176,7 @@ ylabel('y')
 zlim([-1 1] * field_size_xy/2)
 
 %% Cost function
-function y_hat = angleRangeFunctions(x_in, n, m, n_ind, m_ind, offset_z)
+function y_hat = angleRangeFunctions(x_in, n, m, n_ind, m_ind, offset_z, field_size_z)
 
 % Evaluate cost function
 r_sq_est = zeros(length(n),1);
@@ -214,24 +198,18 @@ for i = 1:length(n)
     end
 end
 
-% % Cost function for altitude
+% Cost function for z range
 z_est = zeros(length(x_in)/3, 1);
-for i = 1:(length(x_in)/3)
-    z_est(i) = x_in(3*i);
+for row = 1:length(z_est)
+    z_est(row) = max(0, abs(x_in(3*row)) - (field_size_z/2));
 end
 
-% Cost function for z-center
-c_est = (sum(x_in(mod(1:length(x_in),3) == 0)) / (length(x_in)/3)).^2;
-
-% y_hat = [r_sq_est; ang_est];
-% y_hat = [r_sq_est; ang_est; z_est];
-% y_hat = [r_sq_est; ang_est; c_est];
-y_hat = [r_sq_est; ang_est; z_est; c_est];
+y_hat = [r_sq_est; ang_est; z_est];
 
 end
 
 %% Jacobian
-function J = jacobian(x_in, n, m, n_ind, m_ind, num_var, num_eq, offset_z)
+function J = jacobian(x_in, n, m, n_ind, m_ind, num_var, num_eq, offset_z, field_size_z)
 
 % Calculate squared range between points
 r_sq_est = zeros(length(n),1);
@@ -244,10 +222,7 @@ for i = 1:length(n)
 end
 
 % Calculate jacobian
-% J = zeros(2*num_eq, num_var);
-% J = zeros(2*num_eq + (num_var/3), num_var);
-% J = zeros(2*num_eq + 1, num_var);
-J = zeros(2*num_eq + (num_var/3) + 1, num_var);
+J = zeros(2*num_eq  + num_var/3, num_var);
 for row = 1:num_eq
     if m(row) == 1
         J(row, n_ind(row, 1:2)) = 2 * (x_in(n_ind(row,1:2)));
@@ -265,14 +240,13 @@ for row = 1:num_eq
 end
 J((num_eq+1):(2*num_eq),:) = rad2deg(J((num_eq+1):(2*num_eq),:) ./ r_sq_est);
 
-% Z constraint
+% Calculate jacobian for z-constraint
 for row = 1:(num_var/3)
-    J(row + 2*num_eq, 3*row) = 1;
-end
-
-% Z-center constraint
-for row = 1:(num_var/3)
-    J(end, 3*row) = 2 * sum(x_in(mod(1:num_var, 3) == 0)) / ((num_var/3)^2);
+    if abs(x_in(3*row)) > (field_size_z/2)
+        J(2*num_eq + row, 3*row) = sign(x_in(3*row));
+    else
+        J(2*num_eq + row, 3*row) = 0;
+    end
 end
 
 end
