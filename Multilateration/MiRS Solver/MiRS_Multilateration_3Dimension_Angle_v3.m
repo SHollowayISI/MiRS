@@ -9,7 +9,7 @@
 % Simulation variables
 num_nodes = 10;
 field_size_xy = 1600;
-field_size_z = 20;
+field_size_z = 0.1;
 offset_z = 100;
 error_var_r = 0.0025;
 error_var_a = 0.2;
@@ -149,6 +149,8 @@ err_xy_rms = rms(sqrt(sum((error_list(:,1:2) - mean(error_list(:,1:2),1)).^2, 2)
 err_z_off = mean(error_list(:,3),1);
 err_z_rms = rms(error_list(:,3) - mean(error_list(:,3),1));
 
+% Info printout
+%
 fprintf('\nSimulation Complete.\n');
 fprintf('Angle Error: (%0.3f x %0.3f x %0.3f = %0.3f) [deg]\n', theta, phi, psi, total);
 fprintf('\nTotal Distance: \nError Offset: %d [m], \nError RMS: %d [m]\n', err_off, err_rms);
@@ -174,6 +176,49 @@ ylim([-1 1] * field_size_xy/2)
 ylabel('y')
 % zlim([-field_size_z field_size_z + offset_z])
 zlim([-1 1] * field_size_xy/2)
+%}
+
+%% Focusing algorithm
+
+% Coherent gain calculation
+baseCoord = [10e3; 0; -1e3];
+centerFrequencies = [0.5, 1, 3, 6] * 1e9;
+
+measuredGain = CalculateFocusLoss(baseCoord, x_exact', x_result', centerFrequencies)
+% rotatedArrayGain = CalculateFocusLoss(baseCoord, x_exact', x_rotated', centerFrequencies)
+
+% Focus point estimation
+estimatedRangeSquared = sum((baseCoord' - x_result).^2, 2);
+guessCoord = {};
+guessCoord{1} = baseCoord;
+W = ones(size(x_result,1));
+
+diffs = guessCoord{1}' - x_exact;
+y_hat = sum(diffs.^2, 2);
+
+y = zeros(size(y_hat));
+for n = 1:length(estimatedRangeSquared)
+    [~, ind] = min(abs(estimatedRangeSquared - y_hat(n)));
+    y(n) = estimatedRangeSquared(ind);
+end
+
+for iter = 2:1000
+    
+    diffs = guessCoord{iter-1}' - x_exact;
+    J = 2 * diffs;
+    y_hat = sum(diffs.^2, 2);
+    
+    h = LMStep(y_hat, y, W, J, 1);
+    
+    guessCoord{iter} = guessCoord{iter-1} + h;
+    
+end
+
+focusPointGain = CalculateFocusLoss(guessCoord{end}, x_result', x_exact', centerFrequencies)
+
+guessError = guessCoord{end} - baseCoord
+guessPhi = atan2d(guessError(2), baseCoord(1))
+guessTheta = atan2d(guessError(3), baseCoord(1))
 
 %% Cost function
 function y_hat = angleRangeFunctions(x_in, n, m, n_ind, m_ind, offset_z, field_size_z)
@@ -275,6 +320,32 @@ function rho = LMMetric(y_hat, y, W, J, h, lambda)
 % Calculate metric for L-M parameter update
 rho = (costFunction(y_hat, y, W, J, zeros(size(h))) - costFunction(y_hat, y, W, J, h)) ./ ...
     (h' * (lambda * diag(J' * W * J) .* eye(size(J, 2)) * h + (J' * W * (y - y_hat))));
+
+end
+
+%% Focusing Algorithm
+
+function gain = ...
+    CalculateFocusLoss(baseCoordinates, realCoordinates, measuredCoordinates, centerFrequencies)
+
+% Calculate times of flight
+[trueTimeOfFlight, ~] = CalculateDelay(baseCoordinates, realCoordinates);
+[~, measuredTimeDelay] = CalculateDelay(baseCoordinates, measuredCoordinates);
+
+% Calculate gain
+phases = 2 * pi * centerFrequencies .* (trueTimeOfFlight - measuredTimeDelay)';
+amplitudes = sum(exp(1i * phases), 1);
+gain = 20*log10(abs(amplitudes))';
+
+end
+
+function [timeOfFlight, timeDelay] = CalculateDelay(baseCoord, nodeCoords)
+
+ranges = sqrt(sum((nodeCoords - baseCoord).^2, 1));
+
+timeOfFlight = ranges / physconst('Lightspeed');
+maxTOF = max(timeOfFlight);
+timeDelay = timeOfFlight - maxTOF;
 
 end
 
