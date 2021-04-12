@@ -42,7 +42,7 @@ for block = 1:radarsetup.n_p
         [~, tgt_ang] = rangeangle(target_list.pos, simsetup.radar_pos);
         
         % Set up weights to implement TDM-MIMO
-        weights = [0; 0];
+        weights = zeros(radarsetup.n_tx, 1);
         weights(chirp) = 1;
         
         % Radiate signal towards all targets

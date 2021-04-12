@@ -17,13 +17,13 @@ scenario.radarsetup = struct( ...
     'f_c',          78.5e9, ...             % Operating frequency in Hz
     'f_s',          45e6, ...               % ADC sample frequency in Hz
     't_ch',         1.6e-3, ...             % Chirp duration in seconds
-    'bw',           5.0e9, ...              % Chirp bandwidth in Hz
+    'bw',           1.0e9, ...              % Chirp bandwidth in Hz
     'n_p',          64, ...                 % Number of (MIMO) chirps per CPI
     'drop_s',       7200, ...               % Number of samples to drop
     'cpi_fr',       5, ...                  % Number of CPI per frame
     ...
     ... % Antenna Array Properties
-    'n_tx',         2, ...                  % Number of elements in horizontal Tx array
+    'n_tx',         3, ...                  % Number of elements in horizontal Tx array
     'd_tx',         2, ...                  % Distance between Tx elements in wavelengths
     'n_rx',         4, ...                  % Number of elements in horizontal Rx array
     'd_rx',         0.5, ...                % Distance between Rx elements in wavelengths

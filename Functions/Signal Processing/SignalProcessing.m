@@ -29,6 +29,7 @@ cube.range_cube = fft(scenario.rx_sig, N_r, 1);
 % Remove negative complex frequencies
 cube.range_cube = cube.range_cube(1:ceil(end/2),:,:);
 
+
 %% Perform Doppler FFT
 
 % Calculate FFT size
