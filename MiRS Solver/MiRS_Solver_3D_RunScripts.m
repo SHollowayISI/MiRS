@@ -8,34 +8,30 @@
 %% User Inputs
 
 % Simulation variables
-num_nodes = 10;
-field_size_xy = 1600;
-% field_size_z = field_size_in;
-field_size_z = 1;
-% offset_z = offset_in;
-offset_z = 100;
-error_var_r = 0.0025;
-% error_var_r = range_error_in;
-error_var_a = 1;
-error_var_z = min(0.1, field_size_z);
-digitalPhase = true;
+num_nodes = 10;                         % Total number of nodes, including master
+field_size_xy = 1600;                   % Width of total field of nodes, in meters
+field_size_z = field_size_in;                       % Maximum separation in altitude between nodes
+offset_z = offset_in;                         % Height of master node above slave nodes
+error_var_r = range_error_in;                   % Standard deviation of range measurements
+error_var_a = 1;                        % Standard deviation of angle measurements
+error_var_z = min(0.1, field_size_z);   % Standard deviation of altitude measurements
+digitalPhase = true;                    % Discretize phase of pointing algorithm
 
 % Solver variables
-max_iter = 10;
-min_iter = 1;
-r_factor = 1e0;
-a_factor = 1e0;
-z_factor = 1e9;
-r_weight = r_factor/(error_var_r)^4;
-a_weight = a_factor/(error_var_a)^2;
-z_weight = min(z_factor/(error_var_z)^2, 1e20);
-cost_thresh = -Inf;
-cost_diff_thresh = -10;
-% min_iter = 
-lambda_init = 0.01;
-L_up = 11;
-L_down = 9;
-epsilon = 0.9;
+max_iter = 10;                          % Maximum iterations to use for solver
+min_iter = 1;                           % Minimum iterations to use for solver
+r_factor = 1e0;                         % Extra weighting factor for range
+a_factor = 1e0;                         % Extra weighting factor for angle
+z_factor = 1e9;                         % Extra weighting factor for altitude
+r_weight = r_factor/(error_var_r)^4;    % Covariance matrix of range measurements
+a_weight = a_factor/(error_var_a)^2;    % Covariance matrix of angle measurements
+z_weight = min(z_factor/(error_var_z)^2, 1e20);     %matrix of altitude measurements
+cost_thresh = -Inf;                     % Log-cost function value required to break loop (unused)
+cost_diff_thresh = -10;                 % Log-cost difference required to break loop (unused)
+lambda_init = 0.01;                     % Initial lambda value for levenberg-marquadt
+L_up = 11;                              % Lambda adjustment factor for LM algorithm
+L_down = 9;                             % Lambda adjustment factor for LM algorithm
+epsilon = 0.9;                          % Lambda adjustment factor for LM algorithm
 
 %% Setup
 

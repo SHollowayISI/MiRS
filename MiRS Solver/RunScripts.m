@@ -1,3 +1,5 @@
+% Script to repeat solver for Monte Carlo testing
+% (Poorly formatted)
 
 clear variables
 close all;
@@ -50,7 +52,7 @@ for f = 1:length(field_sizes)
             base_distance_in = base_distances;
             offset_in = offsets(o);
             
-            MiRS_Multilateration_3Dimension_Angle_v5;
+            MiRS_Solver_3D_RunScripts;
             
             theta_out(i, f, o) = theta;
             psi_out(i, f, o) = psi;
